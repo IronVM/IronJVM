@@ -18,6 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#![feature(arbitrary_enum_discriminant)]
-
-pub mod classfile;
+pub enum VerificationTypeInfo {}

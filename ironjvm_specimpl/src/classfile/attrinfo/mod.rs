@@ -18,6 +18,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#![feature(arbitrary_enum_discriminant)]
+use rend::{u16_be, u32_be};
 
-pub mod classfile;
+use crate::classfile::AttributeInfo;
+
+pub mod smtattr;
+
+pub enum AttributeInfoType {
+    ConstantValueAttribute {
+        constantvalue_index: u16_be,
+    },
+    CodeAttribute {
+        max_stack: u16_be,
+        max_locals: u16_be,
+        code_length: u32_be,
+        code: Vec<u8>,
+        exception_table_length: u16_be,
+        exception_table: Vec<CodeAttributeExceptionTableEntry>,
+        attributes_count: u16_be,
+        attributes: Vec<AttributeInfo>,
+    },
+}
+
+pub struct CodeAttributeExceptionTableEntry {
+    pub start_pc: u16_be,
+    pub end_pc: u16_be,
+    pub handler_pc: u16_be,
+    pub catch_type: u16_be,
+}

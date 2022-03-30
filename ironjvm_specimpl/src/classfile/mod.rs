@@ -18,18 +18,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::{u32_be, u16_be};
+use rend::{u16_be, u32_be};
 
+pub mod attrinfo;
+pub mod cpinfo;
 pub mod flags;
 
-#[repr(C)]
 pub struct AttributeInfo {
     pub attribute_name_index: u16_be,
     pub attribute_length: u32_be,
-    pub info: Vec<u8>,
+    pub info: attrinfo::AttributeInfoType,
 }
 
-#[repr(C)]
 pub struct ClassFile {
     pub magic: u32_be,
     pub minor_version: u16_be,
@@ -49,13 +49,11 @@ pub struct ClassFile {
     pub attributes: Vec<AttributeInfo>,
 }
 
-#[repr(C)]
 pub struct CpInfo {
     pub tag: u8,
-    pub info: Vec<u8>,
+    pub info: cpinfo::CpInfoType,
 }
 
-#[repr(C)]
 pub struct FieldInfo {
     pub access_flags: u16_be,
     pub name_index: u16_be,
@@ -64,7 +62,6 @@ pub struct FieldInfo {
     pub attributes: Vec<AttributeInfo>,
 }
 
-#[repr(C)]
 pub struct MethodInfo {
     pub access_flags: u16_be,
     pub name_index: u16_be,
