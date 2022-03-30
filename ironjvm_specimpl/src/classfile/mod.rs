@@ -18,32 +18,34 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use rend::{u32_be, u16_be};
+
 pub mod flags;
 
 #[repr(C)]
 pub struct AttributeInfo {
-    pub attribute_name_index: u16,
-    pub attribute_length: u32,
+    pub attribute_name_index: u16_be,
+    pub attribute_length: u32_be,
     pub info: Vec<u8>,
 }
 
 #[repr(C)]
 pub struct ClassFile {
-    pub magic: u32,
-    pub minor_version: u16,
-    pub major_version: u16,
-    pub constant_pool_count: u16,
+    pub magic: u32_be,
+    pub minor_version: u16_be,
+    pub major_version: u16_be,
+    pub constant_pool_count: u16_be,
     pub constant_pool: Vec<CpInfo>,
-    pub access_flags: u16,
-    pub this_class: u16,
-    pub super_class: u16,
-    pub interfaces_count: u16,
-    pub interfaces: Vec<u16>,
-    pub fields_count: u16,
+    pub access_flags: u16_be,
+    pub this_class: u16_be,
+    pub super_class: u16_be,
+    pub interfaces_count: u16_be,
+    pub interfaces: Vec<u16_be>,
+    pub fields_count: u16_be,
     pub fields: Vec<FieldInfo>,
-    pub methods_count: u16,
+    pub methods_count: u16_be,
     pub methods: Vec<MethodInfo>,
-    pub attributes_count: u16,
+    pub attributes_count: u16_be,
     pub attributes: Vec<AttributeInfo>,
 }
 
@@ -55,18 +57,18 @@ pub struct CpInfo {
 
 #[repr(C)]
 pub struct FieldInfo {
-    pub access_flags: u16,
-    pub name_index: u16,
-    pub descriptor_index: u16,
-    pub attributes_count: u16,
+    pub access_flags: u16_be,
+    pub name_index: u16_be,
+    pub descriptor_index: u16_be,
+    pub attributes_count: u16_be,
     pub attributes: Vec<AttributeInfo>,
 }
 
 #[repr(C)]
 pub struct MethodInfo {
-    pub access_flags: u16,
-    pub name_index: u16,
-    pub descriptor_index: u16,
-    pub attributes_count: u16,
+    pub access_flags: u16_be,
+    pub name_index: u16_be,
+    pub descriptor_index: u16_be,
+    pub attributes_count: u16_be,
     pub attributes: Vec<AttributeInfo>,
 }
