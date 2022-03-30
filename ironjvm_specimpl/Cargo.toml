@@ -1,0 +1,9 @@
+[package]
+name = "ironjvm_specimpl"
+authors = ["HTGAzureX1212."]
+version = "18.0.0-dev.1"
+description = "JVM Specification implementation for IronJVM"
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]
