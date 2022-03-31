@@ -7,4 +7,3 @@ edition = "2021"
 license = "GPL-2.0"
 
 [dependencies]
-rend = "0.3.6"

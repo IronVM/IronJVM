@@ -18,69 +18,67 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::{u16_be, u32_be};
-
 #[repr(u8)]
 pub enum CpInfoType {
     ConstantUtf8 {
-        length: u16_be,
+        length: u16,
         bytes: Vec<u8>,
     } = 1,
     ConstantInteger {
-        bytes: u32_be,
+        bytes: u32,
     } = 3,
     ConstantFloat {
-        bytes: u32_be,
+        bytes: u32,
     } = 4,
     ConstantLong {
-        high_bytes: u32_be,
-        low_bytes: u32_be,
+        high_bytes: u32,
+        low_bytes: u32,
     } = 5,
     ConstantDouble {
-        high_bytes: u32_be,
-        low_bytes: u32_be,
+        high_bytes: u32,
+        low_bytes: u32,
     } = 6,
     ConstantClass {
-        name_index: u16_be,
+        name_index: u16,
     } = 7,
     ConstantString {
-        string_index: u16_be,
+        string_index: u16,
     } = 8,
     ConstantFieldRef {
-        class_index: u16_be,
-        name_and_type_index: u16_be,
+        class_index: u16,
+        name_and_type_index: u16,
     } = 9,
     ConstantMethodRef {
-        class_index: u16_be,
-        name_and_type_index: u16_be,
+        class_index: u16,
+        name_and_type_index: u16,
     } = 10,
     ConstantInterfaceMethodRef {
-        class_index: u16_be,
-        name_and_type_index: u16_be,
+        class_index: u16,
+        name_and_type_index: u16,
     } = 11,
     ConstantNameAndTypeIndex {
-        name_index: u16_be,
-        descriptor_index: u16_be,
+        name_index: u16,
+        descriptor_index: u16,
     } = 12,
     ConstantMethodHandle {
         reference_kind: u8,
-        reference_index: u16_be,
+        reference_index: u16,
     } = 15,
     ConstantMethodType {
-        descriptor_index: u16_be,
+        descriptor_index: u16,
     } = 16,
     ConstantDynamic {
-        bootstrap_method_attr_index: u16_be,
-        name_and_type_index: u16_be,
+        bootstrap_method_attr_index: u16,
+        name_and_type_index: u16,
     } = 17,
     ConstantInvokeDynamic {
-        bootstrap_method_attr_index: u16_be,
-        name_and_type_index: u16_be,
+        bootstrap_method_attr_index: u16,
+        name_and_type_index: u16,
     } = 18,
     ConstantModule {
-        name_index: u16_be,
+        name_index: u16,
     } = 19,
     ConstantPackage {
-        name_index: u16_be,
+        name_index: u16,
     } = 20,
 }

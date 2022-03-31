@@ -18,12 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::u16_be;
-
 pub struct LocalVariable {
-    pub start_pc: u16_be,
-    pub length: u16_be,
-    pub name_index: u16_be,
-    pub descriptor_index: u16_be,
-    pub index: u16_be,
+    pub start_pc: u16,
+    pub length: u16,
+    pub name_index: u16,
+    pub descriptor_index: u16,
+    pub index: u16,
 }

@@ -18,8 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::{u16_be, u32_be};
-
 use crate::classfile::AttributeInfo;
 
 pub mod icattr;
@@ -30,62 +28,62 @@ pub mod smtattr;
 
 pub enum AttributeInfoType {
     ConstantValueAttribute {
-        constantvalue_index: u16_be,
+        constantvalue_index: u16,
     },
     CodeAttribute {
-        max_stack: u16_be,
-        max_locals: u16_be,
-        code_length: u32_be,
+        max_stack: u16,
+        max_locals: u16,
+        code_length: u32,
         code: Vec<u8>,
-        exception_table_length: u16_be,
+        exception_table_length: u16,
         exception_table: Vec<CodeAttributeExceptionTableEntry>,
-        attributes_count: u16_be,
+        attributes_count: u16,
         attributes: Vec<AttributeInfo>,
     },
     StackMapTableAttribute {
-        number_of_entries: u16_be,
+        number_of_entries: u16,
         stack_map_table: Vec<smtattr::StackMapFrame>,
     },
     ExceptionsAttribute {
-        number_of_exceptions: u16_be,
-        exception_index_table: Vec<u16_be>,
+        number_of_exceptions: u16,
+        exception_index_table: Vec<u16>,
     },
     InnerClassesAttribute {
-        number_of_classes: u16_be,
+        number_of_classes: u16,
         classes: Vec<icattr::InnerClass>,
     },
     EnclosingMethodAttribute {
-        class_index: u16_be,
-        method_index: u16_be,
+        class_index: u16,
+        method_index: u16,
     },
     SyntheticAttribute,
     SignatureAttribute {
-        signature_index: u16_be,
+        signature_index: u16,
     },
     SourceFileAttribute {
-        sourcefile_index: u16_be,
+        sourcefile_index: u16,
     },
     SourceDebugExtensionAttribute {
         debug_extension: Vec<u8>,
     },
     LineNumberTableAttribute {
-        line_number_table_length: u16_be,
+        line_number_table_length: u16,
         line_numer_table: Vec<lntattr::LineNumber>,
     },
     LocalVariableTableAttribute {
-        local_variable_table_length: u16_be,
+        local_variable_table_length: u16,
         local_variable_table: Vec<lvtattr::LocalVariable>
     },
     LocalVariableTypeTableAttribute {
-        local_variable_type_table_length: u16_be,
+        local_variable_type_table_length: u16,
         local_variable_type_table: Vec<lvttattr::LocalVariableType>,
     },
     DeprecatedAttribute,
 }
 
 pub struct CodeAttributeExceptionTableEntry {
-    pub start_pc: u16_be,
-    pub end_pc: u16_be,
-    pub handler_pc: u16_be,
-    pub catch_type: u16_be,
+    pub start_pc: u16,
+    pub end_pc: u16,
+    pub handler_pc: u16,
+    pub catch_type: u16,
 }

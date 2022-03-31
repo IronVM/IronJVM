@@ -18,9 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::u16_be;
-
 pub struct LineNumber {
-    pub start_pc: u16_be,
-    pub line_number: u16_be,
+    pub start_pc: u16,
+    pub line_number: u16,
 }

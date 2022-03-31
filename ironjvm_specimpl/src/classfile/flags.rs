@@ -18,64 +18,62 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::u16_be;
-
 pub struct ClassAccessFlags;
 
 impl ClassAccessFlags {
-    pub const ACC_PUBLIC: u16_be = u16_be::new(0x0001);
-    pub const ACC_FINAL: u16_be = u16_be::new(0x0010);
-    pub const ACC_SUPER: u16_be = u16_be::new(0x0020);
-    pub const ACC_INTERFACE: u16_be = u16_be::new(0x0200);
-    pub const ACC_ABSTRACT: u16_be = u16_be::new(0x0400);
-    pub const ACC_SYNTHETIC: u16_be = u16_be::new(0x1000);
-    pub const ACC_ANNOTATION: u16_be = u16_be::new(0x2000);
-    pub const ACC_ENUM: u16_be = u16_be::new(0x4000);
-    pub const ACC_MODULE: u16_be = u16_be::new(0x8000);
+    pub const ACC_PUBLIC: u16 = 0x0001;
+    pub const ACC_FINAL: u16 = 0x0010;
+    pub const ACC_SUPER: u16 = 0x0020;
+    pub const ACC_INTERFACE: u16 = 0x0200;
+    pub const ACC_ABSTRACT: u16 = 0x0400;
+    pub const ACC_SYNTHETIC: u16 = 0x1000;
+    pub const ACC_ANNOTATION: u16 = 0x2000;
+    pub const ACC_ENUM: u16 = 0x4000;
+    pub const ACC_MODULE: u16 = 0x8000;
 }
 
 pub struct FieldAccessFlags;
 
 impl FieldAccessFlags {
-    pub const ACC_PUBLIC: u16_be = u16_be::new(0x0001);
-    pub const ACC_PRIVATE: u16_be = u16_be::new(0x0002);
-    pub const ACC_PROTECTED: u16_be = u16_be::new(0x0004);
-    pub const ACC_STATIC: u16_be = u16_be::new(0x0008);
-    pub const ACC_FINAL: u16_be = u16_be::new(0x0010);
-    pub const ACC_VOLATILE: u16_be = u16_be::new(0x0040);
-    pub const ACC_TRANSIENT: u16_be = u16_be::new(0x0080);
-    pub const ACC_SYNTHETIC: u16_be = u16_be::new(0x1000);
-    pub const ACC_ENUM: u16_be = u16_be::new(0x4000);
+    pub const ACC_PUBLIC: u16 = 0x0001;
+    pub const ACC_PRIVATE: u16 = 0x0002;
+    pub const ACC_PROTECTED: u16 = 0x0004;
+    pub const ACC_STATIC: u16 = 0x0008;
+    pub const ACC_FINAL: u16 = 0x0010;
+    pub const ACC_VOLATILE: u16 = 0x0040;
+    pub const ACC_TRANSIENT: u16 = 0x0080;
+    pub const ACC_SYNTHETIC: u16 = 0x1000;
+    pub const ACC_ENUM: u16 = 0x4000;
 }
 
 pub struct InnerClassAccessFlags;
 
 impl InnerClassAccessFlags {
-    pub const ACC_PUBLIC: u16_be = u16_be::new(0x0001);
-    pub const ACC_PRIVATE: u16_be = u16_be::new(0x0002);
-    pub const ACC_PROTECTED: u16_be = u16_be::new(0x0004);
-    pub const ACC_STATIC: u16_be = u16_be::new(0x0008);
-    pub const ACC_FINAL: u16_be = u16_be::new(0x0010);
-    pub const ACC_INTERFACE: u16_be = u16_be::new(0x0200);
-    pub const ACC_ABSTRACT: u16_be = u16_be::new(0x0400);
-    pub const ACC_SYNTHETIC: u16_be = u16_be::new(0x1000);
-    pub const ACC_ANNOTATION: u16_be = u16_be::new(0x2000);
-    pub const ACC_ENUM: u16_be = u16_be::new(0x4000);
+    pub const ACC_PUBLIC: u16 = 0x0001;
+    pub const ACC_PRIVATE: u16 = 0x0002;
+    pub const ACC_PROTECTED: u16 = 0x0004;
+    pub const ACC_STATIC: u16 = 0x0008;
+    pub const ACC_FINAL: u16 = 0x0010;
+    pub const ACC_INTERFACE: u16 = 0x0200;
+    pub const ACC_ABSTRACT: u16 = 0x0400;
+    pub const ACC_SYNTHETIC: u16 = 0x1000;
+    pub const ACC_ANNOTATION: u16 = 0x2000;
+    pub const ACC_ENUM: u16 = 0x4000;
 }
 
 pub struct MethodAccessFlags;
 
 impl MethodAccessFlags {
-    pub const ACC_PUBLIC: u16_be = u16_be::new(0x0001);
-    pub const ACC_PRIVATE: u16_be = u16_be::new(0x0002);
-    pub const ACC_PROTECTED: u16_be = u16_be::new(0x0004);
-    pub const ACC_STATIC: u16_be = u16_be::new(0x0008);
-    pub const ACC_FINAL: u16_be = u16_be::new(0x0010);
-    pub const ACC_SYNCHRONIZED: u16_be = u16_be::new(0x0020);
-    pub const ACC_BRIDGE: u16_be = u16_be::new(0x0040);
-    pub const ACC_VARARGS: u16_be = u16_be::new(0x0080);
-    pub const ACC_NATIVE: u16_be = u16_be::new(0x0100);
-    pub const ACC_ABSTRACT: u16_be = u16_be::new(0x0400);
-    pub const ACC_STRICT: u16_be = u16_be::new(0x0800);
-    pub const ACC_SYNTHETIC: u16_be = u16_be::new(0x1000);
+    pub const ACC_PUBLIC: u16 = 0x0001;
+    pub const ACC_PRIVATE: u16 = 0x0002;
+    pub const ACC_PROTECTED: u16 = 0x0004;
+    pub const ACC_STATIC: u16 = 0x0008;
+    pub const ACC_FINAL: u16 = 0x0010;
+    pub const ACC_SYNCHRONIZED: u16 = 0x0020;
+    pub const ACC_BRIDGE: u16 = 0x0040;
+    pub const ACC_VARARGS: u16 = 0x0080;
+    pub const ACC_NATIVE: u16 = 0x0100;
+    pub const ACC_ABSTRACT: u16 = 0x0400;
+    pub const ACC_STRICT: u16 = 0x0800;
+    pub const ACC_SYNTHETIC: u16 = 0x1000;
 }

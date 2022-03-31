@@ -18,11 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use rend::u16_be;
-
 pub struct InnerClass {
-    pub inner_class_info_index: u16_be,
-    pub outer_class_info_index: u16_be,
-    pub inner_name_index: u16_be,
-    pub inner_class_access_flags: u16_be,
+    pub inner_class_info_index: u16,
+    pub outer_class_info_index: u16,
+    pub inner_name_index: u16,
+    pub inner_class_access_flags: u16,
 }
