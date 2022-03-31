@@ -18,4 +18,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-pub enum VerificationTypeInfo {}
+use rend::u16_be;
+
+pub enum StackMapFrame {
+    SameFrame {
+        frame_type: u8,
+    },
+    SameLocals1StackItemFrame {
+        frame_type: u8,
+        stack: Vec<VerificationTypeInfo>,
+    },
+    SameLocals1StackItemFrameExtended {
+        frame_type: u8,
+        offset_delta: u16_be,
+        stack: Vec<VerificationTypeInfo>,
+    },
+    ChopFrame {
+        frame_type: u8,
+        offset_delta: u16_be,
+    },
+    SameFrameExtended {
+        frame_type: u8,
+        offset_delta: u16_be,
+    },
+    AppendFrame {
+        frame_type: u8,
+        offset_delta: u16_be,
+        locals: Vec<VerificationTypeInfo>,
+    },
+    FullFrame {
+        frame_type: u8,
+        offset_delta: u16_be,
+        number_of_locals: u16_be,
+        locals: Vec<VerificationTypeInfo>,
+        number_of_stack_items: u16_be,
+        stack: Vec<VerificationTypeInfo>,
+    },
+}
+
+pub enum VerificationTypeInfo {
+    TopVariableInfo { tag: u8 },
+    IntegerVariableInfo { tag: u8 },
+    FloatVariableInfo { tag: u8 },
+    DoubleVariableInfo { tag: u8 },
+    LongVariableInfo { tag: u8 },
+    NullVariableInfo { tag: u8 },
+    UninitializedThisVariableInfo { tag: u8 },
+    ObjectVariableInfo { tag: u8 },
+    UninitializedVariableInfo { tag: u8, cpool_index: u16_be },
+}

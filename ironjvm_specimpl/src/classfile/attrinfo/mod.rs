@@ -38,6 +38,10 @@ pub enum AttributeInfoType {
         attributes_count: u16_be,
         attributes: Vec<AttributeInfo>,
     },
+    StackMapTableAttribute {
+        number_of_entries: u16_be,
+        stack_map_table: Vec<smtattr::StackMapFrame>,
+    },
 }
 
 pub struct CodeAttributeExceptionTableEntry {
