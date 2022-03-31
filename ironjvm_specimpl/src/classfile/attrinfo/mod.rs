@@ -22,6 +22,9 @@ use rend::{u16_be, u32_be};
 
 use crate::classfile::AttributeInfo;
 
+pub mod icattr;
+pub mod lntattr;
+pub mod lvtattr;
 pub mod smtattr;
 
 pub enum AttributeInfoType {
@@ -41,6 +44,36 @@ pub enum AttributeInfoType {
     StackMapTableAttribute {
         number_of_entries: u16_be,
         stack_map_table: Vec<smtattr::StackMapFrame>,
+    },
+    ExceptionsAttribute {
+        number_of_exceptions: u16_be,
+        exception_index_table: Vec<u16_be>,
+    },
+    InnerClassesAttribute {
+        number_of_classes: u16_be,
+        classes: Vec<icattr::InnerClass>,
+    },
+    EnclosingMethodAttribute {
+        class_index: u16_be,
+        method_index: u16_be,
+    },
+    SyntheticAttribute,
+    SignatureAttribute {
+        signature_index: u16_be,
+    },
+    SourceFileAttribute {
+        sourcefile_index: u16_be,
+    },
+    SourceDebugExtensionAttribute {
+        debug_extension: Vec<u8>,
+    },
+    LineNumberTableAttribute {
+        line_number_table_length: u16_be,
+        line_numer_table: Vec<lntattr::LineNumber>,
+    },
+    LocalVariableTableAttribute {
+        local_variable_table_length: u16_be,
+        local_variable_table: Vec<lvtattr::LocalVariable>
     },
 }
 

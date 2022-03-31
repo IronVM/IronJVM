@@ -48,6 +48,21 @@ impl FieldAccessFlags {
     pub const ACC_ENUM: u16_be = u16_be::new(0x4000);
 }
 
+pub struct InnerClassAccessFlags;
+
+impl InnerClassAccessFlags {
+    pub const ACC_PUBLIC: u16_be = u16_be::new(0x0001);
+    pub const ACC_PRIVATE: u16_be = u16_be::new(0x0002);
+    pub const ACC_PROTECTED: u16_be = u16_be::new(0x0004);
+    pub const ACC_STATIC: u16_be = u16_be::new(0x0008);
+    pub const ACC_FINAL: u16_be = u16_be::new(0x0010);
+    pub const ACC_INTERFACE: u16_be = u16_be::new(0x0200);
+    pub const ACC_ABSTRACT: u16_be = u16_be::new(0x0400);
+    pub const ACC_SYNTHETIC: u16_be = u16_be::new(0x1000);
+    pub const ACC_ANNOTATION: u16_be = u16_be::new(0x2000);
+    pub const ACC_ENUM: u16_be = u16_be::new(0x4000);
+}
+
 pub struct MethodAccessFlags;
 
 impl MethodAccessFlags {
