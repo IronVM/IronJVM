@@ -25,7 +25,9 @@ pub mod icattr;
 pub mod lntattr;
 pub mod lvtattr;
 pub mod lvttattr;
+pub mod mattr;
 pub mod mpattr;
+pub mod rattr;
 pub mod ripaattr;
 pub mod rvanriaattr;
 pub mod rvtnritaattr;
@@ -114,6 +116,43 @@ pub enum AttributeInfoType {
     MethodParametersAttribute {
         parameters_count: u8,
         parameters: Vec<mpattr::MethodParameter>,
+    },
+    ModuleAttribute {
+        module_name_index: u16,
+        module_flags: u16,
+        module_version_index: u16,
+        requires_count: u16,
+        requires: Vec<mattr::ModuleRequire>,
+        exports_count: u16,
+        exports: Vec<mattr::ModuleExport>,
+        opens_count: u16,
+        opens: Vec<mattr::ModuleOpen>,
+        uses_count: u16,
+        uses_index: Vec<u16>,
+        provides_count: u16,
+        provides: Vec<mattr::ModuleProvide>,
+    },
+    ModulePackagesAttribute {
+        package_count: u16,
+        package_index: Vec<u16>,
+    },
+    ModuleMainClassAttribute {
+        main_class_index: u16,
+    },
+    NestHostAttribute {
+        host_class_index: u16,
+    },
+    NestMembersAttribute {
+        number_of_classes: u16,
+        classes: Vec<u16>,
+    },
+    RecordAttribute {
+        components_count: u16,
+        components: Vec<rattr::RecordComponentInfo>,
+    },
+    PermittedSubclassesAttribute {
+        number_of_classes: u16,
+        classes: Vec<u16>,
     }
 }
 

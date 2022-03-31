@@ -85,3 +85,34 @@ impl MethodParameterAccessFlags {
     pub const ACC_SYNTHETIC: u16 = 0x1000;
     pub const ACC_MANDATED: u16 = 0x8000;
 }
+
+pub struct ModuleFlags;
+
+impl ModuleFlags {
+    pub const ACC_OPEN: u16 = 0x0020;
+    pub const SYNTHETIC: u16 = 0x1000;
+    pub const ACC_MANDATED: u16 = 0x8000;
+}
+
+pub struct ModuleExportFlags;
+
+impl ModuleExportFlags {
+    pub const SYNTHETIC: u16 = 0x1000;
+    pub const ACC_MANDATED: u16 = 0x8000;
+}
+
+pub struct ModuleOpenFlags;
+
+impl ModuleOpenFlags {
+    pub const SYNTHETIC: u16 = 0x1000;
+    pub const ACC_MANDATED: u16 = 0x8000;
+}
+
+pub struct ModuleRequireFlags;
+
+impl ModuleRequireFlags {
+    pub const ACC_TRANSITIVE: u16 = 0x0020;
+    pub const ACC_STATIC_PHASE: u16 = 0x0040;
+    pub const SYNTHETIC: u16 = 0x1000;
+    pub const ACC_MANDATED: u16 = 0x8000;
+}
