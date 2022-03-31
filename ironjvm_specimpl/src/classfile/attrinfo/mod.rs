@@ -20,10 +20,15 @@
 
 use crate::classfile::AttributeInfo;
 
+pub mod bmattr;
 pub mod icattr;
 pub mod lntattr;
 pub mod lvtattr;
 pub mod lvttattr;
+pub mod mpattr;
+pub mod ripaattr;
+pub mod rvanriaattr;
+pub mod rvtnritaattr;
 pub mod smtattr;
 
 pub enum AttributeInfoType {
@@ -79,6 +84,37 @@ pub enum AttributeInfoType {
         local_variable_type_table: Vec<lvttattr::LocalVariableType>,
     },
     DeprecatedAttribute,
+    RuntimeVisibleAnnotationsAttribute {
+        num_annotations: u16,
+        annotations: Vec<rvanriaattr::Annotation>,
+    },
+    RuntimeInvisibleAnnotationsAttribute {
+        num_annotations: u16,
+        annotations: Vec<rvanriaattr::Annotation>,
+    },
+    RuntimeInvisibleParameterAnnotationsAttribute {
+        num_parameters: u16,
+        parameter_annotations: Vec<ripaattr::ParameterAnnotation>,
+    },
+    RuntimeVisibleTypeAnnotationsAttribute {
+        num_annotations: u16,
+        annotations: Vec<rvtnritaattr::TypeAnnotation>,
+    },
+    RuntimeInvisibleTypeAnnotationsAttribute {
+        num_annotations: u16,
+        annotations: Vec<rvtnritaattr::TypeAnnotation>,
+    },
+    AnnotationDefaultAttribute {
+        element_value: rvanriaattr::ElementValue,
+    },
+    BootstrapMethodsAttribute {
+        num_bootstrap_methods: u16,
+        bootstrap_methods: Vec<bmattr::BootstrapMethod>,
+    },
+    MethodParametersAttribute {
+        parameters_count: u8,
+        parameters: Vec<mpattr::MethodParameter>,
+    }
 }
 
 pub struct CodeAttributeExceptionTableEntry {

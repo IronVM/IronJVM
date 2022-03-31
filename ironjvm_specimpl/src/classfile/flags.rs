@@ -77,3 +77,11 @@ impl MethodAccessFlags {
     pub const ACC_STRICT: u16 = 0x0800;
     pub const ACC_SYNTHETIC: u16 = 0x1000;
 }
+
+pub struct MethodParameterAccessFlags;
+
+impl MethodParameterAccessFlags {
+    pub const ACC_FINAL: u16 = 0x0010;
+    pub const ACC_SYNTHETIC: u16 = 0x1000;
+    pub const ACC_MANDATED: u16 = 0x8000;
+}
