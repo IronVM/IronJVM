@@ -18,14 +18,4 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::fs::File;
-
-pub struct ClassFileParser {
-    classfile: File,
-}
-
-impl ClassFileParser {
-    pub fn new(classfile: File) -> Self {
-        Self { classfile }
-    }
-}
+pub fn ironjvm_main() {}

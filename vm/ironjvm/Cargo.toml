@@ -1,10 +1,10 @@
 [package]
-name = "ironjvm_cfparser"
+name = "ironjvm"
 authors = ["HTGAzureX1212."]
 version = "18.0.0"
-description = "Java classfile parser for IronJVM"
+description = "The IronJVM binary"
 edition = "2021"
 license = "GPL-2.0"
 
 [dependencies]
-semver = "1.0.7"
+ironjvm_driver = { path = "../ironjvm_driver" }

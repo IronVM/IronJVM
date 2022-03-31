@@ -1,10 +1,9 @@
 [package]
-name = "ironjvm_cfparser"
+name = "ironjvm_driver"
 authors = ["HTGAzureX1212."]
 version = "18.0.0"
-description = "Java classfile parser for IronJVM"
+description = "Main entry point of IronJVM"
 edition = "2021"
 license = "GPL-2.0"
 
 [dependencies]
-semver = "1.0.7"
