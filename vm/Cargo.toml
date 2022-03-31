@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "ironjvm_cfparser",
+    "ironjvm_specimpl",
+]
