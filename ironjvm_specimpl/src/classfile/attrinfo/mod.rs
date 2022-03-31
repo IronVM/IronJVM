@@ -25,6 +25,7 @@ use crate::classfile::AttributeInfo;
 pub mod icattr;
 pub mod lntattr;
 pub mod lvtattr;
+pub mod lvttattr;
 pub mod smtattr;
 
 pub enum AttributeInfoType {
@@ -75,6 +76,11 @@ pub enum AttributeInfoType {
         local_variable_table_length: u16_be,
         local_variable_table: Vec<lvtattr::LocalVariable>
     },
+    LocalVariableTypeTableAttribute {
+        local_variable_type_table_length: u16_be,
+        local_variable_type_table: Vec<lvttattr::LocalVariableType>,
+    },
+    DeprecatedAttribute,
 }
 
 pub struct CodeAttributeExceptionTableEntry {
