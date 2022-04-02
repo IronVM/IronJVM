@@ -43,5 +43,29 @@ pub fn handle_vm_options(args: &[String]) -> Option<getopts::Matches> {
         (option.apply)(&mut options);
     });
 
+    let result = options.parse(args);
+    if let Err(error) = result {
+        match error {
+            getopts::Fail::UnrecognizedOption(option) => {
+                println!("ironjvm: unrecognized option: {option}");
+            },
+            _ => ()
+        }
+
+        return None;
+    }
+
+    let matches = result.unwrap();
+
+    if matches.opt_present("h") || matches.opt_present("help") {
+        opthandle::ironjvm_usage();
+        return None;
+    }
+
+    if matches.opt_present("V") || matches.opt_present("version") {
+        opthandle::ironjvm_version();
+        return None;
+    }
+
     todo!()
 }

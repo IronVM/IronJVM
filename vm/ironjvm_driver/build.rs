@@ -18,28 +18,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use ironjvm_session::config;
-use ironjvm_session::getopts;
+use std::process::Command;
 
-pub fn ironjvm_usage() {
-    let jvm_options = config::jvm_options();
+pub fn main() {
+    let commit_hash = Command::new("git")
+        .args(["rev-parse", "--short=9", "HEAD"])
+        .output()
+        .map(|output| {
+            let full = String::from_utf8(output.stdout).unwrap_or(String::new());
+            full.lines().collect::<Vec<_>>()[0].to_string()
+        })
+        .unwrap_or(String::new());
+    let commit_date = Command::new("git")
+        .args(["log", "--date=short", "--pretty=format:%cd"])
+        .output()
+        .map(|output| String::from_utf8(output.stdout).unwrap_or(String::new()))
+        .unwrap_or(String::new());
 
-    let mut options = getopts::Options::new();
-    jvm_options.iter().for_each(|option| {
-        (option.apply)(&mut options);
-    });
-
-    println!(
-        "{options}",
-        options = options.usage("Usage: ironjvm [options] <mainclass> [args...]"),
-    );
-}
-
-pub fn ironjvm_version() {
-    let java_version = env!("IRONJVM_JAVA_VERSION");
-    let pkg_version = env!("CARGO_PKG_VERSION");
-    let git_revision = env!("IRONJVM_REVISION_HASH_DATE");
-
-    println!("IronJVM for Java {java_version}");
-    println!("IronJVM {pkg_version} ({git_revision})");
+    println!("cargo:rustc-env=IRONJVM_REVISION_HASH_DATE={commit_hash} {commit_date}");
+    println!("cargo:rustc-env=IRONJVM_JAVA_VERSION=18");
 }
