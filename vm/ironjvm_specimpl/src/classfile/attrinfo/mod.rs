@@ -79,7 +79,7 @@ pub enum AttributeInfoType {
     },
     LocalVariableTableAttribute {
         local_variable_table_length: u16,
-        local_variable_table: Vec<lvtattr::LocalVariable>
+        local_variable_table: Vec<lvtattr::LocalVariable>,
     },
     LocalVariableTypeTableAttribute {
         local_variable_type_table_length: u16,
@@ -153,7 +153,7 @@ pub enum AttributeInfoType {
     PermittedSubclassesAttribute {
         number_of_classes: u16,
         classes: Vec<u16>,
-    }
+    },
 }
 
 pub struct CodeAttributeExceptionTableEntry {

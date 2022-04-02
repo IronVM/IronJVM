@@ -18,14 +18,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::fs::File;
-
-pub struct ClassFileParser {
-    pub classfile: File,
+pub struct JvmOption {
+    pub apply: Box<dyn Fn(&mut getopts::Options) -> &mut getopts::Options>,
+    pub name: &'static str,
 }
 
-impl ClassFileParser {
-    pub fn new(classfile: File) -> Self {
-        Self { classfile }
+impl JvmOption {
+    pub fn new<F>(name: &'static str, apply: F) -> Self
+    where
+        F: Fn(&mut getopts::Options) -> &mut getopts::Options + 'static,
+    {
+        Self { name, apply: Box::new(apply) }
     }
+}
+
+pub fn jvm_options() -> Vec<JvmOption> {
+    vec![
+        JvmOption::new("help", |options| {
+            options.optflag("h", "help", "Shows this help message")
+        }),
+        JvmOption::new("version", |options| {
+            options.optflag("V", "version", "Shows version information")
+        }),
+    ]
 }

@@ -25,12 +25,26 @@ pub struct Annotation {
 }
 
 pub enum ElementValue {
-    Tag {
-        tag: u8,
+    Tag { tag: u8 },
+    Value { value: ElementValueValue },
+}
+
+pub enum ElementValueValue {
+    ConstValueIndex {
+        const_value_index: u16,
     },
-    Value {
-        value: ElementValueValue
-    }
+    EnumConstValue {
+        enum_const_value: EnumConstValue,
+    },
+    ClassInfoIndex {
+        class_info_index: u16,
+    },
+    AnnotationValue {
+        annotation_value: Annotation,
+    },
+    ArrayValue {
+        array_value: ArrayValue,
+    },
 }
 
 pub struct ElementValuePair {
@@ -46,12 +60,4 @@ pub struct ArrayValue {
 pub struct EnumConstValue {
     pub type_name_index: u16,
     pub const_name_index: u16,
-}
-
-pub union ElementValueValue {
-    pub const_value_index: u16,
-    pub enum_const_value: EnumConstValue,
-    pub class_info_index: u16,
-    pub annotation_value: Annotation,
-    pub array_value: ArrayValue,
 }

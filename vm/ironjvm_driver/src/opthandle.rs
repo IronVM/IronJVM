@@ -18,14 +18,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::fs::File;
+use ironjvm_session::config;
+use ironjvm_session::getopts;
 
-pub struct ClassFileParser {
-    pub classfile: File,
-}
+pub fn ironjvm_usage() {
+    let jvm_options = config::jvm_options();
 
-impl ClassFileParser {
-    pub fn new(classfile: File) -> Self {
-        Self { classfile }
-    }
+    let mut options = getopts::Options::new();
+    jvm_options.iter().for_each(|option| {
+        (option.apply)(&mut options);
+    });
+
+    println!(
+        "{options}",
+        options = options.usage("Usage: ironjvm [options] <mainclass> [args...]"),
+    );
 }

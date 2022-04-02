@@ -60,7 +60,7 @@ pub enum TypeAnnotationTargetInfo {
     TypeArgumentTarget {
         offset: u16,
         type_argument_index: u8,
-    }
+    },
 }
 
 pub struct TypeAnnotationLocalVarTargetTableEntry {

@@ -3,5 +3,6 @@ members = [
     "ironjvm",
     "ironjvm_cfparser",
     "ironjvm_driver",
+    "ironjvm_session",
     "ironjvm_specimpl",
 ]
