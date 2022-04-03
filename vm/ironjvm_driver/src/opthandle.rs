@@ -38,8 +38,9 @@ pub fn ironjvm_usage() {
 pub fn ironjvm_version() {
     let java_version = env!("IRONJVM_JAVA_VERSION");
     let pkg_version = env!("CARGO_PKG_VERSION");
-    let git_revision = env!("IRONJVM_REVISION_HASH_DATE");
+    let git_revision_hash = env!("IRONJVM_REVISION_HASH");
+    let git_revision_date = env!("IRONJVM_REVISION_DATE");
 
     println!("IronJVM for Java {java_version}");
-    println!("IronJVM {pkg_version} ({git_revision})");
+    println!("IronJVM {pkg_version} ({git_revision_hash} {git_revision_date})");
 }

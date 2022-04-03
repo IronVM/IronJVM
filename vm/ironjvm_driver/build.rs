@@ -25,16 +25,22 @@ pub fn main() {
         .args(["rev-parse", "--short=9", "HEAD"])
         .output()
         .map(|output| {
-            let full = String::from_utf8(output.stdout).unwrap_or(String::new());
-            full.lines().collect::<Vec<_>>()[0].to_string()
+            let stdout = String::from_utf8(output.stdout).unwrap_or(String::new());
+            println!("[ironjvm_driver] git rev-parse --short=9 HEAD: {}", &stdout);
+            stdout
         })
         .unwrap_or(String::new());
     let commit_date = Command::new("git")
-        .args(["log", "--date=short", "--pretty=format:%cd"])
+        .args(["show", "-s", "--date=short", "--pretty=format:%cd", "HEAD"])
         .output()
-        .map(|output| String::from_utf8(output.stdout).unwrap_or(String::new()))
+        .map(|output| {
+            let stdout = String::from_utf8(output.stdout).unwrap_or(String::new());
+            println!("[ironjvm_driver] git show -s --date=short --pretty=format:%cd HEAD: {}", &stdout);
+            stdout
+        })
         .unwrap_or(String::new());
 
-    println!("cargo:rustc-env=IRONJVM_REVISION_HASH_DATE={commit_hash} {commit_date}");
+    println!("cargo:rustc-env=IRONJVM_REVISION_HASH={commit_hash}");
+    println!("cargo:rustc-env=IRONJVM_REVISION_DATE={commit_date}");
     println!("cargo:rustc-env=IRONJVM_JAVA_VERSION=18");
 }
