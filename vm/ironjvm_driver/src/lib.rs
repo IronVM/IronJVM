@@ -18,54 +18,5 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::env;
-
-use ironjvm_session::config;
-use ironjvm_session::getopts;
-
-mod opthandle;
-
 pub fn ironjvm_main() {
-    let args = env::args().collect::<Vec<_>>();
-    handle_vm_options(&args);
-}
-
-pub fn handle_vm_options(args: &[String]) -> Option<getopts::Matches> {
-    let args = &args[1..];
-
-    if args.is_empty() {
-        opthandle::ironjvm_usage();
-        return None;
-    }
-
-    let mut options = getopts::Options::new();
-    config::jvm_options().iter().for_each(|option| {
-        (option.apply)(&mut options);
-    });
-
-    let result = options.parse(args);
-    if let Err(error) = result {
-        match error {
-            getopts::Fail::UnrecognizedOption(option) => {
-                println!("ironjvm: unrecognized option: {option}");
-            },
-            _ => ()
-        }
-
-        return None;
-    }
-
-    let matches = result.unwrap();
-
-    if matches.opt_present("h") || matches.opt_present("help") {
-        opthandle::ironjvm_usage();
-        return None;
-    }
-
-    if matches.opt_present("V") || matches.opt_present("version") {
-        opthandle::ironjvm_version();
-        return None;
-    }
-
-    todo!()
 }
