@@ -18,8 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! JVM Specification Implementation
+//! JNI Invocation API implementation
 
-#![feature(arbitrary_enum_discriminant)]
+use std::ffi::c_void;
 
-pub mod classfile;
+use jni_sys::{JavaVM, jint};
+
+#[no_mangle]
+pub extern "C" fn JNI_CreateJavaVM(_: *mut *mut JavaVM, _: *mut *mut c_void, _: *mut c_void) -> jint {
+    todo!()
+}

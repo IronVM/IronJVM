@@ -18,8 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! JVM Specification Implementation
+//! LibJVM dynamic library implementation.
 
-#![feature(arbitrary_enum_discriminant)]
+#![crate_type = "cdylib"]
 
-pub mod classfile;
+pub mod jniinv;

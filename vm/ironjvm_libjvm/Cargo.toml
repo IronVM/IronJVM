@@ -1,0 +1,10 @@
+[package]
+name = "ironjvm_libjvm"
+authors = ["HTGAzureX1212."]
+version = "18.0.0"
+description = "Implementation of the LibJVM dynamic library."
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]
+jni-sys = "0.3.0"

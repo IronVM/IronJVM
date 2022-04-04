@@ -1,5 +1,6 @@
 [workspace]
 members = [
     "ironjvm_cfparser",
+    "ironjvm_libjvm",
     "ironjvm_specimpl",
 ]
