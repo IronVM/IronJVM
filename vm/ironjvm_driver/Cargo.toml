@@ -1,9 +1,0 @@
-[package]
-name = "ironjvm_driver"
-authors = ["HTGAzureX1212."]
-version = "18.0.0"
-description = "Main entry point of IronJVM"
-edition = "2021"
-license = "GPL-2.0"
-
-[dependencies]
