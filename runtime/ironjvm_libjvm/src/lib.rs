@@ -18,13 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! JNI Invocation API implementation
+//! LibJVM dynamic library implementation.
 
-use std::ffi::c_void;
-
-use jni_sys::{JavaVM, jint};
-
-#[no_mangle]
-pub extern "C" fn JNI_CreateJavaVM(_: *mut *mut JavaVM, _: *mut *mut c_void, _: *mut c_void) -> jint {
-    todo!()
-}
+pub mod jniinv;

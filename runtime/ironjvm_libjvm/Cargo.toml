@@ -8,3 +8,6 @@ license = "GPL-2.0"
 
 [dependencies]
 jni-sys = "0.3.0"
+
+[lib]
+crate-type = ["cdylib"]
