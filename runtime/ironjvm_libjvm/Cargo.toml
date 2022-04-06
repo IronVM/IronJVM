@@ -7,7 +7,7 @@ edition = "2021"
 license = "GPL-2.0"
 
 [dependencies]
-jni-sys = "0.3.0"
+jni-sys = { git = "https://github.com/sfackler/rust-jni-sys", branch = "master" }
 
 [lib]
 crate-type = ["cdylib"]

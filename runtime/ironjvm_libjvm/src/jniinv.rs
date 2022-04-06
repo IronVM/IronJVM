@@ -22,11 +22,27 @@
 
 use std::ffi::c_void;
 
-use jni_sys::{JavaVM, JavaVMInitArgs, JNI_OK, jint};
+use jni_sys::{JavaVM, JavaVMInitArgs, jint, JNI_ERR, JNI_OK, JNI_VERSION_10};
 
 #[no_mangle]
 pub extern "C" fn JNI_CreateJavaVM(_: *mut *mut JavaVM, _: *mut *mut c_void, args: *mut c_void) -> jint {
     let _ = args as *mut JavaVMInitArgs;
+
+    JNI_OK
+}
+
+#[no_mangle]
+pub extern "C" fn JNI_GetDefaultJavaVMInitArgs(args: *mut c_void) -> jint {
+    let args = args as *mut JavaVMInitArgs;
+
+    unsafe {
+        let version = (*args).version;
+        (*args).version = JNI_VERSION_10;
+
+        if version < JNI_VERSION_10 {
+            return JNI_ERR;
+        }
+    }
 
     JNI_OK
 }
