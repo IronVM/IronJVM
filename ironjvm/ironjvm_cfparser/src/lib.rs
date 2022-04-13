@@ -18,10 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::fs::File;
 use byteorder::{BigEndian, ReadBytesExt};
+use std::fs::File;
+use std::io::Read;
 
-use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
+use ironjvm_specimpl::classfile::{ClassFile, CpInfo};
 
 use crate::error::{ParseError, ParseResult};
 
@@ -37,22 +39,60 @@ impl ClassFileParser {
     }
 
     pub fn parse(mut self) -> ParseResult<ClassFile> {
-        let _ = self.parse_magic()?;
+        let magic = self.parse_magic()?;
+        let minor_version = self.next_u2()?;
+        let major_version = self.next_u2()?;
+        let constant_pool_count = self.next_u2()?;
     }
 
     fn next_u1(&mut self) -> ParseResult<u8> {
-        self.classfile.read_u8().map_err(|src| ParseError::IoError { src })
+        self.classfile
+            .read_u8()
+            .map_err(|src| ParseError::IoError { src })
     }
 
     fn next_u2(&mut self) -> ParseResult<u16> {
-        self.classfile.read_u16::<BigEndian>().map_err(|src| ParseError::IoError { src })
+        self.classfile
+            .read_u16::<BigEndian>()
+            .map_err(|src| ParseError::IoError { src })
     }
 
     fn next_u4(&mut self) -> ParseResult<u32> {
-        self.classfile.read_u32::<BigEndian>().map_err(|src| ParseError::IoError { src })
+        self.classfile
+            .read_u32::<BigEndian>()
+            .map_err(|src| ParseError::IoError { src })
     }
 
     fn parse_magic(&mut self) -> ParseResult<u32> {
-        self.next_u4().and_then(|magic| if magic == 0xCAFEBABE { Ok(magic) } else { Err(ParseError::InvalidMagic) })
+        self.next_u4().and_then(|magic| {
+            if magic == 0xCAFEBABE {
+                Ok(magic)
+            } else {
+                Err(ParseError::InvalidMagic)
+            }
+        })
+    }
+
+    fn parse_constant_pool(&mut self, count: u16) -> ParseResult<Vec<CpInfo>> {
+        let capacity = (count - 1) as usize;
+        let mut pool = Vec::with_capacity(capacity);
+
+        for _ in 0..capacity {
+            let tag = self.next_u1()?;
+            let info = match tag {
+                1 => {
+                    let length = self.next_u2()?;
+                    let mut bytes = Vec::with_capacity(length as usize);
+                    self.classfile.read_exact(bytes.as_mut_slice());
+
+                    CpInfoType::ConstantUtf8 { length, bytes }
+                }
+                _ => todo!(),
+            };
+
+            pool.push(CpInfo { tag, info })
+        }
+
+        Ok(pool)
     }
 }

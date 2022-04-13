@@ -30,21 +30,11 @@ pub enum ElementValue {
 }
 
 pub enum ElementValueValue {
-    ConstValueIndex {
-        const_value_index: u16,
-    },
-    EnumConstValue {
-        enum_const_value: EnumConstValue,
-    },
-    ClassInfoIndex {
-        class_info_index: u16,
-    },
-    AnnotationValue {
-        annotation_value: Annotation,
-    },
-    ArrayValue {
-        array_value: ArrayValue,
-    },
+    ConstValueIndex { const_value_index: u16 },
+    EnumConstValue { enum_const_value: EnumConstValue },
+    ClassInfoIndex { class_info_index: u16 },
+    AnnotationValue { annotation_value: Annotation },
+    ArrayValue { array_value: ArrayValue },
 }
 
 pub struct ElementValuePair {

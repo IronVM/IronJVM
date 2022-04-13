@@ -22,9 +22,7 @@ use std::io::Error;
 
 pub enum ParseError {
     InvalidMagic,
-    IoError {
-        src: Error,
-    },
+    IoError { src: Error },
 }
 
 pub type ParseResult<T> = Result<T, ParseError>;
