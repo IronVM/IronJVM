@@ -7,4 +7,6 @@ edition = "2021"
 license = "GPL-2.0"
 
 [dependencies]
-semver = "1.0.7"
+ironjvm_specimpl = { path = "../ironjvm_specimpl" }
+
+byteorder = "1.4.3"

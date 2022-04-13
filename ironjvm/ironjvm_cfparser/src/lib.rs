@@ -19,6 +19,13 @@
  */
 
 use std::fs::File;
+use byteorder::{BigEndian, ReadBytesExt};
+
+use ironjvm_specimpl::classfile::ClassFile;
+
+use crate::error::{ParseError, ParseResult};
+
+mod error;
 
 pub struct ClassFileParser {
     pub classfile: File,
@@ -27,5 +34,25 @@ pub struct ClassFileParser {
 impl ClassFileParser {
     pub fn new(classfile: File) -> Self {
         Self { classfile }
+    }
+
+    pub fn parse(mut self) -> ParseResult<ClassFile> {
+        let _ = self.parse_magic()?;
+    }
+
+    fn next_u1(&mut self) -> ParseResult<u8> {
+        self.classfile.read_u8().map_err(|src| ParseError::IoError { src })
+    }
+
+    fn next_u2(&mut self) -> ParseResult<u16> {
+        self.classfile.read_u16::<BigEndian>().map_err(|src| ParseError::IoError { src })
+    }
+
+    fn next_u4(&mut self) -> ParseResult<u32> {
+        self.classfile.read_u32::<BigEndian>().map_err(|src| ParseError::IoError { src })
+    }
+
+    fn parse_magic(&mut self) -> ParseResult<u32> {
+        self.next_u4().and_then(|magic| if magic == 0xCAFEBABE { Ok(magic) } else { Err(ParseError::InvalidMagic) })
     }
 }
