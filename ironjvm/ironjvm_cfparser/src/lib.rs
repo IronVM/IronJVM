@@ -26,10 +26,13 @@ use std::io::{Cursor, Read};
 
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
+use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
+use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -372,6 +375,92 @@ impl ClassFileParser {
                     }
                 }
                 "Synthetic" => AttributeInfoType::SyntheticAttribute,
+                "Signature" => {
+                    let signature_index = self.next_u2()?;
+
+                    AttributeInfoType::SignatureAttribute { signature_index }
+                }
+                "SourceFile" => {
+                    let sourcefile_index = self.next_u2()?;
+
+                    AttributeInfoType::SourceFileAttribute { sourcefile_index }
+                }
+                "SourceDebugExtension" => {
+                    let mut debug_extension = Vec::with_capacity(attribute_length as usize);
+                    self.classfile.read_exact(debug_extension.as_mut_slice())?;
+
+                    AttributeInfoType::SourceDebugExtensionAttribute { debug_extension }
+                }
+                "LineNumberTable" => {
+                    let line_number_table_length = self.next_u2()?;
+                    let mut line_number_table =
+                        Vec::with_capacity(line_number_table_length as usize);
+                    for _ in 0..line_number_table_length {
+                        let start_pc = self.next_u2()?;
+                        let line_number = self.next_u2()?;
+
+                        line_number_table.push(LineNumber {
+                            start_pc,
+                            line_number,
+                        });
+                    }
+
+                    AttributeInfoType::LineNumberTableAttribute {
+                        line_number_table_length,
+                        line_number_table,
+                    }
+                }
+                "LocalVariableTable" => {
+                    let local_variable_table_length = self.next_u2()?;
+                    let mut local_variable_table =
+                        Vec::with_capacity(local_variable_table_length as usize);
+                    for _ in 0..local_variable_table_length {
+                        let start_pc = self.next_u2()?;
+                        let length = self.next_u2()?;
+                        let name_index = self.next_u2()?;
+                        let descriptor_index = self.next_u2()?;
+                        let index = self.next_u2()?;
+
+                        local_variable_table.push(LocalVariable {
+                            start_pc,
+                            length,
+                            name_index,
+                            descriptor_index,
+                            index,
+                        });
+                    }
+
+                    AttributeInfoType::LocalVariableTableAttribute {
+                        local_variable_table_length,
+                        local_variable_table,
+                    }
+                }
+                "LocalVariableTypeTable" => {
+                    let local_variable_type_table_length = self.next_u2()?;
+                    let mut local_variable_type_table =
+                        Vec::with_capacity(local_variable_type_table_length as usize);
+                    for _ in 0..local_variable_type_table_length {
+                        let start_pc = self.next_u2()?;
+                        let length = self.next_u2()?;
+                        let name_index = self.next_u2()?;
+                        let signature_index = self.next_u2()?;
+                        let index = self.next_u2()?;
+
+                        local_variable_type_table.push(LocalVariableType {
+                            start_pc,
+                            length,
+                            name_index,
+                            signature_index,
+                            index,
+                        });
+                    }
+
+                    AttributeInfoType::LocalVariableTypeTableAttribute {
+                        local_variable_type_table_length,
+                        local_variable_type_table,
+                    }
+                }
+                "Deprecated" => AttributeInfoType::DeprecatedAttribute,
                 _ => todo!("implemented attribute type"),
             };
 

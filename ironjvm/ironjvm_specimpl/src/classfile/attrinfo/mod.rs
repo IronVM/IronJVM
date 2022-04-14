@@ -76,7 +76,7 @@ pub enum AttributeInfoType {
     },
     LineNumberTableAttribute {
         line_number_table_length: u16,
-        line_numer_table: Vec<lntattr::LineNumber>,
+        line_number_table: Vec<lntattr::LineNumber>,
     },
     LocalVariableTableAttribute {
         local_variable_table_length: u16,
