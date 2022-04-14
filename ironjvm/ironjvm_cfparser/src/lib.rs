@@ -28,6 +28,7 @@ use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEnt
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::attrinfo::smtattr::StackMapFrame;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -312,7 +313,20 @@ impl ClassFileParser {
                         attributes,
                     }
                 }
-                _ => unreachable!("unknown attribute type"),
+                "StackMapTable" => {
+                    let number_of_entries = self.next_u2()?;
+                    let mut stack_map_table = Vec::with_capacity(number_of_entries as usize);
+
+                    for _ in 0..number_of_entries {
+                        stack_map_table.push(self.parse_stack_map_frame()?);
+                    }
+
+                    AttributeInfoType::StackMapTableAttribute {
+                        number_of_entries,
+                        stack_map_table,
+                    }
+                }
+                _ => todo!("implemented attribute type"),
             };
 
             vec.push(AttributeInfo {
@@ -346,5 +360,18 @@ impl ClassFileParser {
         }
 
         Ok(vec)
+    }
+
+    fn parse_stack_map_frame(&mut self) -> ParseResult<StackMapFrame> {
+        let frame_type = self.next_u1()?;
+
+        Ok(match frame_type {
+            0..=63 => {
+                StackMapFrame::SameFrame {
+                    frame_type
+                }
+            },
+            _ => todo!("unimplemented stack frame type")
+        })
     }
 }
