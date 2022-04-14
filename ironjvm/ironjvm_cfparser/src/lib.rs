@@ -23,7 +23,7 @@ use std::fs::File;
 use std::io::Read;
 
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::{ClassFile, CpInfo};
+use ironjvm_specimpl::classfile::{ClassFile, CpInfo, FieldInfo};
 
 use crate::error::{ParseError, ParseResult};
 
@@ -43,6 +43,13 @@ impl ClassFileParser {
         let minor_version = self.next_u2()?;
         let major_version = self.next_u2()?;
         let constant_pool_count = self.next_u2()?;
+        let constant_pool = self.parse_constant_pool(constant_pool_count)?;
+        let access_flags = self.next_u2()?;
+        let this_class = self.next_u2()?;
+        let super_class = self.next_u2()?;
+        let interfaces_count = self.next_u2()?;
+        let interfaces = self.parse_interfaces(interfaces_count)?;
+        let fields_count = self.next_u2()?;
     }
 
     fn next_u1(&mut self) -> ParseResult<u8> {
@@ -87,12 +94,108 @@ impl ClassFileParser {
 
                     CpInfoType::ConstantUtf8 { length, bytes }
                 }
-                _ => todo!(),
+                3 => {
+                    let bytes = self.next_u4()?;
+
+                    CpInfoType::ConstantInteger { bytes }
+                }
+                4 => {
+                    let bytes = self.next_u4()?;
+
+                    CpInfoType::ConstantFloat { bytes }
+                }
+                5 => {
+                    let high_bytes = self.next_u4()?;
+                    let low_bytes = self.next_u4()?;
+
+                    CpInfoType::ConstantLong { high_bytes, low_bytes }
+                }
+                6 => {
+                    let high_bytes = self.next_u4()?;
+                    let low_bytes = self.next_u4()?;
+
+                    CpInfoType::ConstantDouble { high_bytes, low_bytes }
+                }
+                7 => {
+                    let name_index = self.next_u2()?;
+
+                    CpInfoType::ConstantClass { name_index }
+                }
+                8 => {
+                    let string_index = self.next_u2()?;
+
+                    CpInfoType::ConstantString { string_index }
+                }
+                9 => {
+                    let class_index = self.next_u2()?;
+                    let name_and_type_index = self.next_u2()?;
+
+                    CpInfoType::ConstantFieldRef { class_index, name_and_type_index }
+                }
+                10 => {
+                    let class_index = self.next_u2()?;
+                    let name_and_type_index = self.next_u2()?;
+
+                    CpInfoType::ConstantMethodRef { class_index, name_and_type_index }
+                }
+                11 => {
+                    let class_index = self.next_u2()?;
+                    let name_and_type_index = self.next_u2()?;
+
+                    CpInfoType::ConstantInterfaceMethodRef { class_index, name_and_type_index }
+                }
+                12 => {
+                    let name_index = self.next_u2()?;
+                    let descriptor_index = self.next_u2()?;
+
+                    CpInfoType::ConstantNameAndType { name_index, descriptor_index }
+                }
+                15 => {
+                    let reference_kind = self.next_u1()?;
+                    let reference_index = self.next_u2()?;
+
+                    CpInfoType::ConstantMethodHandle { reference_kind, reference_index }
+                }
+                16 => {
+                    let descriptor_index = self.next_u2()?;
+
+                    CpInfoType::ConstantMethodType { descriptor_index }
+                }
+                17 => {
+                    let bootstrap_method_attr_index = self.next_u2()?;
+                    let name_and_type_index = self.next_u2()?;
+
+                    CpInfoType::ConstantDynamic { bootstrap_method_attr_index, name_and_type_index }
+                }
+                18 => {
+                    let bootstrap_method_attr_index = self.next_u2()?;
+                    let name_and_type_index = self.next_u2()?;
+
+                    CpInfoType::ConstantInvokeDynamic { bootstrap_method_attr_index, name_and_type_index }
+                }
+                19 => {
+                    let name_index = self.next_u2()?;
+
+                    CpInfoType::ConstantModule { name_index }
+                }
+                20 => {
+                    let name_index = self.next_u2()?;
+
+                    CpInfoType::ConstantPackage { name_index }
+                }
+                _ => unreachable!()
             };
 
-            pool.push(CpInfo { tag, info })
+            pool.push(CpInfo { tag, info });
         }
 
         Ok(pool)
+    }
+
+    fn parse_interfaces(&mut self, count: u16) -> ParseResult<Vec<u16>> {
+        let mut vec = Vec::with_capacity(count as usize);
+        self.classfile.read_u16_into(vec.as_mut_slice())?;
+
+        Ok(vec)
     }
 }

@@ -25,4 +25,10 @@ pub enum ParseError {
     IoError { src: Error },
 }
 
+impl From<Error> for ParseError {
+    fn from(src: Error) -> Self {
+        Self::IoError { src }
+    }
+}
+
 pub type ParseResult<T> = Result<T, ParseError>;

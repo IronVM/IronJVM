@@ -56,7 +56,7 @@ pub enum CpInfoType {
         class_index: u16,
         name_and_type_index: u16,
     } = 11,
-    ConstantNameAndTypeIndex {
+    ConstantNameAndType {
         name_index: u16,
         descriptor_index: u16,
     } = 12,
