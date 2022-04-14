@@ -25,10 +25,10 @@ use std::fs::File;
 use std::io::Read;
 
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
+use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
-use ironjvm_specimpl::classfile::attrinfo::smtattr::StackMapFrame;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -316,7 +316,6 @@ impl ClassFileParser {
                 "StackMapTable" => {
                     let number_of_entries = self.next_u2()?;
                     let mut stack_map_table = Vec::with_capacity(number_of_entries as usize);
-
                     for _ in 0..number_of_entries {
                         stack_map_table.push(self.parse_stack_map_frame()?);
                     }
@@ -366,12 +365,82 @@ impl ClassFileParser {
         let frame_type = self.next_u1()?;
 
         Ok(match frame_type {
-            0..=63 => {
-                StackMapFrame::SameFrame {
-                    frame_type
+            0..=63 => StackMapFrame::SameFrame { frame_type },
+            64..=127 => {
+                let stack = self.parse_verification_type_info()?;
+
+                StackMapFrame::SameLocals1StackItemFrame { frame_type, stack }
+            }
+            247 => {
+                let offset_delta = self.next_u2()?;
+                let stack = self.parse_verification_type_info()?;
+
+                StackMapFrame::SameLocals1StackItemFrameExtended { frame_type, offset_delta, stack }
+            }
+            248..=250 => {
+                let offset_delta = self.next_u2()?;
+
+                StackMapFrame::ChopFrame { frame_type, offset_delta }
+            }
+            251 => {
+                let offset_delta = self.next_u2()?;
+
+                StackMapFrame::SameFrameExtended { frame_type, offset_delta }
+            }
+            252..=254 => {
+                let offset_delta = self.next_u2()?;
+
+                let locals_length = frame_type - 251;
+                let mut locals = Vec::with_capacity(locals_length as usize);
+                for _ in 0..locals_length {
+                    locals.push(self.parse_verification_type_info()?);
                 }
-            },
-            _ => todo!("unimplemented stack frame type")
+
+                StackMapFrame::AppendFrame { frame_type, offset_delta, locals }
+            }
+            255 => {
+                let offset_delta = self.next_u2()?;
+
+                let number_of_locals = self.next_u2()?;
+                let mut locals = Vec::with_capacity(number_of_locals as usize);
+                for _ in 0..number_of_locals {
+                    locals.push(self.parse_verification_type_info()?);
+                }
+
+                let number_of_stack_items = self.next_u2()?;
+                let mut stack = Vec::with_capacity(number_of_stack_items as usize);
+                for _ in 0..number_of_stack_items {
+                    stack.push(self.parse_verification_type_info()?);
+                }
+
+                StackMapFrame::FullFrame { frame_type, offset_delta, number_of_locals, locals, number_of_stack_items, stack }
+            }
+            _ => unreachable!(),
+        })
+    }
+
+    fn parse_verification_type_info(&mut self) -> ParseResult<VerificationTypeInfo> {
+        let tag = self.next_u1()?;
+
+        Ok(match tag {
+            0 => VerificationTypeInfo::TopVariableInfo { tag },
+            1 => VerificationTypeInfo::IntegerVariableInfo { tag },
+            2 => VerificationTypeInfo::FloatVariableInfo { tag },
+            3 => VerificationTypeInfo::DoubleVariableInfo { tag },
+            4 => VerificationTypeInfo::LongVariableInfo { tag },
+            5 => VerificationTypeInfo::NullVariableInfo { tag },
+            6 => VerificationTypeInfo::UninitializedThisVariableInfo { tag },
+            7 => {
+                let cpool_index = self.next_u2()?;
+
+                VerificationTypeInfo::ObjectVariableInfo { tag, cpool_index }
+            }
+            8 => {
+                let offset = self.next_u2()?;
+
+                VerificationTypeInfo::UninitializedVariableInfo { tag, offset }
+            }
+            _ => unreachable!(),
         })
     }
 }

@@ -24,12 +24,12 @@ pub enum StackMapFrame {
     },
     SameLocals1StackItemFrame {
         frame_type: u8,
-        stack: Vec<VerificationTypeInfo>,
+        stack: VerificationTypeInfo,
     },
     SameLocals1StackItemFrameExtended {
         frame_type: u8,
         offset_delta: u16,
-        stack: Vec<VerificationTypeInfo>,
+        stack: VerificationTypeInfo,
     },
     ChopFrame {
         frame_type: u8,
@@ -62,6 +62,6 @@ pub enum VerificationTypeInfo {
     LongVariableInfo { tag: u8 },
     NullVariableInfo { tag: u8 },
     UninitializedThisVariableInfo { tag: u8 },
-    ObjectVariableInfo { tag: u8 },
-    UninitializedVariableInfo { tag: u8, cpool_index: u16 },
+    ObjectVariableInfo { tag: u8, cpool_index: u16 },
+    UninitializedVariableInfo { tag: u8, offset: u16 },
 }
