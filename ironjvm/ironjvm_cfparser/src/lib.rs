@@ -33,6 +33,7 @@ use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
 use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::Annotation;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -461,6 +462,18 @@ impl ClassFileParser {
                     }
                 }
                 "Deprecated" => AttributeInfoType::DeprecatedAttribute,
+                "RuntimeVisibleAnnotations" => {
+                    let num_annotations = self.next_u2()?;
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    for _ in 0..num_annotations {
+                        annotations.push(self.parse_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeVisibleAnnotationsAttribute {
+                        num_annotations,
+                        annotations,
+                    }
+                }
                 _ => todo!("implemented attribute type"),
             };
 
@@ -599,5 +612,9 @@ impl ClassFileParser {
             }
             _ => unreachable!(),
         })
+    }
+
+    fn parse_annotation(&mut self) -> ParseResult<Annotation> {
+        todo!()
     }
 }
