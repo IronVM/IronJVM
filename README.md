@@ -1,2 +1,2 @@
 # IronJVM
-A hobby implementation of the Java Virtual Machine (JVM) in Rust.
+A hobby WIP implementation of the Java Virtual Machine (JVM) in Rust.
