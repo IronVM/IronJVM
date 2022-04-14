@@ -18,12 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#![feature(let_else)]
+
 use byteorder::{BigEndian, ReadBytesExt};
 use std::fs::File;
 use std::io::Read;
 
+use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
+use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::{ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
 
 use crate::error::{ParseError, ParseResult};
 
@@ -50,6 +54,8 @@ impl ClassFileParser {
         let interfaces_count = self.next_u2()?;
         let interfaces = self.parse_interfaces(interfaces_count)?;
         let fields_count = self.next_u2()?;
+
+        todo!()
     }
 
     fn next_u1(&mut self) -> ParseResult<u8> {
@@ -108,13 +114,19 @@ impl ClassFileParser {
                     let high_bytes = self.next_u4()?;
                     let low_bytes = self.next_u4()?;
 
-                    CpInfoType::ConstantLong { high_bytes, low_bytes }
+                    CpInfoType::ConstantLong {
+                        high_bytes,
+                        low_bytes,
+                    }
                 }
                 6 => {
                     let high_bytes = self.next_u4()?;
                     let low_bytes = self.next_u4()?;
 
-                    CpInfoType::ConstantDouble { high_bytes, low_bytes }
+                    CpInfoType::ConstantDouble {
+                        high_bytes,
+                        low_bytes,
+                    }
                 }
                 7 => {
                     let name_index = self.next_u2()?;
@@ -130,31 +142,46 @@ impl ClassFileParser {
                     let class_index = self.next_u2()?;
                     let name_and_type_index = self.next_u2()?;
 
-                    CpInfoType::ConstantFieldRef { class_index, name_and_type_index }
+                    CpInfoType::ConstantFieldRef {
+                        class_index,
+                        name_and_type_index,
+                    }
                 }
                 10 => {
                     let class_index = self.next_u2()?;
                     let name_and_type_index = self.next_u2()?;
 
-                    CpInfoType::ConstantMethodRef { class_index, name_and_type_index }
+                    CpInfoType::ConstantMethodRef {
+                        class_index,
+                        name_and_type_index,
+                    }
                 }
                 11 => {
                     let class_index = self.next_u2()?;
                     let name_and_type_index = self.next_u2()?;
 
-                    CpInfoType::ConstantInterfaceMethodRef { class_index, name_and_type_index }
+                    CpInfoType::ConstantInterfaceMethodRef {
+                        class_index,
+                        name_and_type_index,
+                    }
                 }
                 12 => {
                     let name_index = self.next_u2()?;
                     let descriptor_index = self.next_u2()?;
 
-                    CpInfoType::ConstantNameAndType { name_index, descriptor_index }
+                    CpInfoType::ConstantNameAndType {
+                        name_index,
+                        descriptor_index,
+                    }
                 }
                 15 => {
                     let reference_kind = self.next_u1()?;
                     let reference_index = self.next_u2()?;
 
-                    CpInfoType::ConstantMethodHandle { reference_kind, reference_index }
+                    CpInfoType::ConstantMethodHandle {
+                        reference_kind,
+                        reference_index,
+                    }
                 }
                 16 => {
                     let descriptor_index = self.next_u2()?;
@@ -165,13 +192,19 @@ impl ClassFileParser {
                     let bootstrap_method_attr_index = self.next_u2()?;
                     let name_and_type_index = self.next_u2()?;
 
-                    CpInfoType::ConstantDynamic { bootstrap_method_attr_index, name_and_type_index }
+                    CpInfoType::ConstantDynamic {
+                        bootstrap_method_attr_index,
+                        name_and_type_index,
+                    }
                 }
                 18 => {
                     let bootstrap_method_attr_index = self.next_u2()?;
                     let name_and_type_index = self.next_u2()?;
 
-                    CpInfoType::ConstantInvokeDynamic { bootstrap_method_attr_index, name_and_type_index }
+                    CpInfoType::ConstantInvokeDynamic {
+                        bootstrap_method_attr_index,
+                        name_and_type_index,
+                    }
                 }
                 19 => {
                     let name_index = self.next_u2()?;
@@ -183,7 +216,7 @@ impl ClassFileParser {
 
                     CpInfoType::ConstantPackage { name_index }
                 }
-                _ => unreachable!()
+                _ => unreachable!(),
             };
 
             pool.push(CpInfo { tag, info });
@@ -194,7 +227,123 @@ impl ClassFileParser {
 
     fn parse_interfaces(&mut self, count: u16) -> ParseResult<Vec<u16>> {
         let mut vec = Vec::with_capacity(count as usize);
-        self.classfile.read_u16_into(vec.as_mut_slice())?;
+        self.classfile
+            .read_u16_into::<BigEndian>(vec.as_mut_slice())?;
+
+        Ok(vec)
+    }
+
+    fn parse_fields(
+        &mut self,
+        count: u16,
+        constant_pool: &[CpInfo],
+    ) -> ParseResult<Vec<FieldInfo>> {
+        let mut vec = Vec::with_capacity(count as usize);
+
+        for _ in 0..count {
+            let access_flags = self.next_u2()?;
+            let name_index = self.next_u2()?;
+            let descriptor_index = self.next_u2()?;
+            let attributes_count = self.next_u2()?;
+            let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+
+            vec.push(FieldInfo {
+                access_flags,
+                name_index,
+                descriptor_index,
+                attributes_count,
+                attributes,
+            });
+        }
+
+        Ok(vec)
+    }
+
+    fn parse_attributes(
+        &mut self,
+        count: u16,
+        constant_pool: &[CpInfo],
+    ) -> ParseResult<Vec<AttributeInfo>> {
+        let mut vec = Vec::with_capacity(count as usize);
+
+        for _ in 0..count {
+            let attribute_name_index = self.next_u2()?;
+            let attribute_length = self.next_u4()?;
+
+            let name_cp_info = &constant_pool[attribute_name_index as usize].info;
+            let CpInfoType::ConstantUtf8 { bytes, .. } = name_cp_info else {
+                unreachable!()
+            };
+
+            let string = unsafe {
+                // FIXME: JVM spec specifies these are modified UTF8
+                String::from_utf8_unchecked(bytes.clone())
+            };
+            let info = match &*string {
+                "ConstantValue" => {
+                    let constantvalue_index = self.next_u2()?;
+
+                    AttributeInfoType::ConstantValueAttribute {
+                        constantvalue_index,
+                    }
+                }
+                "Code" => {
+                    let max_stack = self.next_u2()?;
+                    let max_locals = self.next_u2()?;
+                    let code_length = self.next_u4()?;
+
+                    let mut code = Vec::with_capacity(code_length as usize);
+                    self.classfile.read_exact(code.as_mut_slice())?;
+
+                    let exception_table_length = self.next_u2()?;
+                    let exception_table = self.parse_exception_table(exception_table_length)?;
+
+                    let attributes_count = self.next_u2()?;
+                    let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+
+                    AttributeInfoType::CodeAttribute {
+                        max_stack,
+                        max_locals,
+                        code_length,
+                        code,
+                        exception_table_length,
+                        exception_table,
+                        attributes_count,
+                        attributes,
+                    }
+                }
+                _ => unreachable!("unknown attribute type"),
+            };
+
+            vec.push(AttributeInfo {
+                attribute_name_index,
+                attribute_length,
+                info,
+            });
+        }
+
+        Ok(vec)
+    }
+
+    fn parse_exception_table(
+        &mut self,
+        count: u16,
+    ) -> ParseResult<Vec<CodeAttributeExceptionTableEntry>> {
+        let mut vec = Vec::with_capacity(count as usize);
+
+        for _ in 0..count {
+            let start_pc = self.next_u2()?;
+            let end_pc = self.next_u2()?;
+            let handler_pc = self.next_u2()?;
+            let catch_type = self.next_u2()?;
+
+            vec.push(CodeAttributeExceptionTableEntry {
+                start_pc,
+                end_pc,
+                handler_pc,
+                catch_type,
+            });
+        }
 
         Ok(vec)
     }

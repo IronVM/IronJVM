@@ -21,6 +21,7 @@
 use crate::classfile::AttributeInfo;
 
 pub mod bmattr;
+pub mod cattr;
 pub mod icattr;
 pub mod lntattr;
 pub mod lvtattr;
@@ -43,7 +44,7 @@ pub enum AttributeInfoType {
         code_length: u32,
         code: Vec<u8>,
         exception_table_length: u16,
-        exception_table: Vec<CodeAttributeExceptionTableEntry>,
+        exception_table: Vec<cattr::CodeAttributeExceptionTableEntry>,
         attributes_count: u16,
         attributes: Vec<AttributeInfo>,
     },
@@ -154,11 +155,4 @@ pub enum AttributeInfoType {
         number_of_classes: u16,
         classes: Vec<u16>,
     },
-}
-
-pub struct CodeAttributeExceptionTableEntry {
-    pub start_pc: u16,
-    pub end_pc: u16,
-    pub handler_pc: u16,
-    pub catch_type: u16,
 }

@@ -18,29 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! JNI Invocation API implementation
-
-use std::ffi::c_void;
-
-use jni_sys::{jint, JavaVM, JavaVMInitArgs, JNI_EVERSION, JNI_OK, JNI_VERSION_10};
-
-#[no_mangle]
-pub extern "C" fn JNI_CreateJavaVM(
-    _: *mut *mut JavaVM,
-    _: *mut *mut c_void,
-    _: *mut c_void,
-) -> jint {
-    JNI_OK
-}
-
-#[no_mangle]
-pub extern "C" fn JNI_GetDefaultJavaVMInitArgs(jvm_args: *mut c_void) -> jint {
-    let jni_version = unsafe { (*(jvm_args as *mut JavaVMInitArgs)).version };
-
-    match jni_version {
-        JNI_VERSION_10 => return JNI_OK,
-        _ => (),
-    }
-
-    JNI_EVERSION
+pub struct CodeAttributeExceptionTableEntry {
+    pub start_pc: u16,
+    pub end_pc: u16,
+    pub handler_pc: u16,
+    pub catch_type: u16,
 }
