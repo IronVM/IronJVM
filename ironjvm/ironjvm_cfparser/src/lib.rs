@@ -22,9 +22,10 @@
 
 use byteorder::{BigEndian, ReadBytesExt};
 use std::fs::File;
-use std::io::Read;
+use std::io::{Cursor, Read};
 
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
+use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
@@ -35,12 +36,14 @@ use crate::error::{ParseError, ParseResult};
 mod error;
 
 pub struct ClassFileParser {
-    pub classfile: File,
+    pub classfile: Cursor<File>,
 }
 
 impl ClassFileParser {
     pub fn new(classfile: File) -> Self {
-        Self { classfile }
+        Self {
+            classfile: Cursor::new(classfile),
+        }
     }
 
     pub fn parse(mut self) -> ParseResult<ClassFile> {
@@ -325,6 +328,50 @@ impl ClassFileParser {
                         stack_map_table,
                     }
                 }
+                "Exceptions" => {
+                    let number_of_exceptions = self.next_u2()?;
+                    let mut exception_index_table =
+                        Vec::with_capacity(number_of_exceptions as usize);
+                    self.classfile
+                        .read_u16_into::<BigEndian>(exception_index_table.as_mut_slice())?;
+
+                    AttributeInfoType::ExceptionsAttribute {
+                        number_of_exceptions,
+                        exception_index_table,
+                    }
+                }
+                "InnerClasses" => {
+                    let number_of_classes = self.next_u2()?;
+                    let mut classes = Vec::with_capacity(number_of_classes as usize);
+                    for _ in 0..number_of_classes {
+                        let inner_class_info_index = self.next_u2()?;
+                        let outer_class_info_index = self.next_u2()?;
+                        let inner_name_index = self.next_u2()?;
+                        let inner_class_access_flags = self.next_u2()?;
+
+                        classes.push(InnerClass {
+                            inner_class_info_index,
+                            outer_class_info_index,
+                            inner_name_index,
+                            inner_class_access_flags,
+                        });
+                    }
+
+                    AttributeInfoType::InnerClassesAttribute {
+                        number_of_classes,
+                        classes,
+                    }
+                }
+                "EnclosingMethod" => {
+                    let class_index = self.next_u2()?;
+                    let method_index = self.next_u2()?;
+
+                    AttributeInfoType::EnclosingMethodAttribute {
+                        class_index,
+                        method_index,
+                    }
+                }
+                "Synthetic" => AttributeInfoType::SyntheticAttribute,
                 _ => todo!("implemented attribute type"),
             };
 
@@ -375,17 +422,27 @@ impl ClassFileParser {
                 let offset_delta = self.next_u2()?;
                 let stack = self.parse_verification_type_info()?;
 
-                StackMapFrame::SameLocals1StackItemFrameExtended { frame_type, offset_delta, stack }
+                StackMapFrame::SameLocals1StackItemFrameExtended {
+                    frame_type,
+                    offset_delta,
+                    stack,
+                }
             }
             248..=250 => {
                 let offset_delta = self.next_u2()?;
 
-                StackMapFrame::ChopFrame { frame_type, offset_delta }
+                StackMapFrame::ChopFrame {
+                    frame_type,
+                    offset_delta,
+                }
             }
             251 => {
                 let offset_delta = self.next_u2()?;
 
-                StackMapFrame::SameFrameExtended { frame_type, offset_delta }
+                StackMapFrame::SameFrameExtended {
+                    frame_type,
+                    offset_delta,
+                }
             }
             252..=254 => {
                 let offset_delta = self.next_u2()?;
@@ -396,7 +453,11 @@ impl ClassFileParser {
                     locals.push(self.parse_verification_type_info()?);
                 }
 
-                StackMapFrame::AppendFrame { frame_type, offset_delta, locals }
+                StackMapFrame::AppendFrame {
+                    frame_type,
+                    offset_delta,
+                    locals,
+                }
             }
             255 => {
                 let offset_delta = self.next_u2()?;
@@ -413,7 +474,14 @@ impl ClassFileParser {
                     stack.push(self.parse_verification_type_info()?);
                 }
 
-                StackMapFrame::FullFrame { frame_type, offset_delta, number_of_locals, locals, number_of_stack_items, stack }
+                StackMapFrame::FullFrame {
+                    frame_type,
+                    offset_delta,
+                    number_of_locals,
+                    locals,
+                    number_of_stack_items,
+                    stack,
+                }
             }
             _ => unreachable!(),
         })
