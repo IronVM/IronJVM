@@ -29,7 +29,7 @@ use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
 use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
 use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
-use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::Annotation;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{Annotation, ElementValue, ElementValuePair, ElementValueValue, EnumConstValue};
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
@@ -613,6 +613,63 @@ impl ClassFileParser {
     }
 
     fn parse_annotation(&mut self) -> ParseResult<Annotation> {
-        todo!()
+        let type_index = self.next_u2()?;
+
+        let num_element_value_pairs = self.next_u2()?;
+        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
+        for _ in 0..num_element_value_pairs {
+            let element_name_index = self.next_u2()?;
+            let value = self.parse_element_value()?;
+
+            element_value_pairs.push(ElementValuePair {
+                element_name_index,
+                value
+            });
+        }
+
+        Ok(Annotation {
+            type_index,
+            num_element_value_pairs,
+            element_value_pairs,
+        })
+    }
+
+    fn parse_element_value(&mut self) -> ParseResult<ElementValue> {
+        let tag = self.next_u1()?;
+        let value = match tag as char {
+            'B' | 'C' | 'D' | 'F' | 'I' | 'J' | 'S' | 'Z' | 's' => {
+                let const_value_index = self.next_u2()?;
+
+                ElementValueValue::ConstValueIndex { const_value_index }
+            }
+            'e' => {
+                let type_name_index = self.next_u2()?;
+                let const_name_index = self.next_u2()?;
+
+                ElementValueValue::EnumConstValue { type_name_index, const_name_index }
+            }
+            'c' => {
+                let class_info_index = self.next_u2()?;
+
+                ElementValueValue::ClassInfoIndex { class_info_index }
+            }
+            '@' => {
+                let annotation_value = self.parse_annotation()?;
+
+                ElementValueValue::AnnotationValue { annotation_value }
+            }
+            '[' => {
+                let num_values = self.next_u2()?;
+                let mut values = Vec::with_capacity(num_values as usize);
+                for _ in 0..num_values {
+                    values.push(self.parse_element_value()?);
+                }
+
+                ElementValueValue::ArrayValue { num_values, values }
+            }
+            _ => unreachable!(),
+        };
+
+        Ok(ElementValue { tag, value })
     }
 }

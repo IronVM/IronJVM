@@ -24,30 +24,20 @@ pub struct Annotation {
     pub element_value_pairs: Vec<ElementValuePair>,
 }
 
-pub enum ElementValue {
-    Tag { tag: u8 },
-    Value { value: ElementValueValue },
+pub struct ElementValue {
+    pub tag: u8,
+    pub value: ElementValueValue,
 }
 
 pub enum ElementValueValue {
     ConstValueIndex { const_value_index: u16 },
-    EnumConstValue { enum_const_value: EnumConstValue },
+    EnumConstValue { type_name_index: u16, const_name_index: u16 },
     ClassInfoIndex { class_info_index: u16 },
     AnnotationValue { annotation_value: Annotation },
-    ArrayValue { array_value: ArrayValue },
+    ArrayValue { num_values: u16, values: Vec<ElementValue> },
 }
 
 pub struct ElementValuePair {
     pub element_name_index: u16,
     pub value: ElementValue,
-}
-
-pub struct ArrayValue {
-    pub num_values: u16,
-    pub values: Vec<ElementValue>,
-}
-
-pub struct EnumConstValue {
-    pub type_name_index: u16,
-    pub const_name_index: u16,
 }
