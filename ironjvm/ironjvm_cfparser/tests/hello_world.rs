@@ -6,7 +6,7 @@ use ironjvm_cfparser::ClassFileParser;
 
 #[test]
 fn hello_world() {
-    let result = File::open("../test_classes/HelloWorld.class");
+    let result = File::open("../test_classes/com/github/htgazurex1212/ironjvm/tests/HelloWorld.class");
     if let Err(error) = result {
         panic!("failed to open classfile: {error}");
     }
