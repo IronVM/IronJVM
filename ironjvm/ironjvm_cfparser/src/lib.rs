@@ -34,6 +34,7 @@ use ironjvm_specimpl::classfile::attrinfo::mattr::{
     ModuleExport, ModuleOpen, ModuleProvide, ModuleRequire,
 };
 use ironjvm_specimpl::classfile::attrinfo::mpattr::MethodParameter;
+use ironjvm_specimpl::classfile::attrinfo::rattr::RecordComponentInfo;
 use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{
     Annotation, ElementValue, ElementValuePair, ElementValueValue,
 };
@@ -46,7 +47,6 @@ use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, Verification
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
-use ironjvm_specimpl::classfile::attrinfo::rattr::RecordComponentInfo;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -688,22 +688,18 @@ impl ClassFileParser {
 
                     AttributeInfoType::ModulePackagesAttribute {
                         package_count,
-                        package_index
+                        package_index,
                     }
                 }
                 "ModuleMainClass" => {
                     let main_class_index = self.next_u2()?;
 
-                    AttributeInfoType::ModuleMainClassAttribute {
-                        main_class_index
-                    }
+                    AttributeInfoType::ModuleMainClassAttribute { main_class_index }
                 }
                 "NestHost" => {
                     let host_class_index = self.next_u2()?;
 
-                    AttributeInfoType::NestHostAttribute {
-                        host_class_index
-                    }
+                    AttributeInfoType::NestHostAttribute { host_class_index }
                 }
                 "NestMembers" => {
                     let number_of_classes = self.next_u2()?;
@@ -728,7 +724,7 @@ impl ClassFileParser {
                             name_index,
                             descriptor_index,
                             attributes_count,
-                            attributes
+                            attributes,
                         });
                     }
                 }
