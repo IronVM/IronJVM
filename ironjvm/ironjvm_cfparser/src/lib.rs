@@ -24,12 +24,20 @@ use byteorder::{BigEndian, ReadBytesExt};
 use std::fs::File;
 use std::io::Read;
 
+use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
 use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
 use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
-use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{Annotation, ElementValue, ElementValuePair, ElementValueValue, EnumConstValue};
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{
+    Annotation, ElementValue, ElementValuePair, ElementValueValue,
+};
+use ironjvm_specimpl::classfile::attrinfo::rvpaattr::ParameterAnnotation;
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::{
+    TypeAnnotation, TypeAnnotationLocalVarTargetTableEntry, TypeAnnotationTargetInfo,
+    TypeAnnotationTypePath, TypeAnnotationTypePathSegment,
+};
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
@@ -472,6 +480,95 @@ impl ClassFileParser {
                         annotations,
                     }
                 }
+                "RuntimeInvisibleAnnotations" => {
+                    let num_annotations = self.next_u2()?;
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    for _ in 0..num_annotations {
+                        annotations.push(self.parse_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeInvisibleAnnotationsAttribute {
+                        num_annotations,
+                        annotations,
+                    }
+                }
+                "RuntimeVisibleParameterAnnotations" => {
+                    let num_parameters = self.next_u2()?;
+                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
+                    for _ in 0..num_parameters {
+                        parameter_annotations.push(self.parse_parameter_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeVisibleParameterAnnotationsAttribute {
+                        num_parameters,
+                        parameter_annotations,
+                    }
+                }
+                "RuntimeInvisibleParameterAnnotations" => {
+                    let num_parameters = self.next_u2()?;
+                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
+                    for _ in 0..num_parameters {
+                        parameter_annotations.push(self.parse_parameter_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeInvisibleParameterAnnotationsAttribute {
+                        num_parameters,
+                        parameter_annotations,
+                    }
+                }
+                "RuntimeVisibleTypeAnnotations" => {
+                    let num_annotations = self.next_u2()?;
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    for _ in 0..num_annotations {
+                        annotations.push(self.parse_type_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeVisibleTypeAnnotationsAttribute {
+                        num_annotations,
+                        annotations,
+                    }
+                }
+                "RuntimeInvisibleTypeAnnotations" => {
+                    let num_annotations = self.next_u2()?;
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    for _ in 0..num_annotations {
+                        annotations.push(self.parse_type_annotation()?);
+                    }
+
+                    AttributeInfoType::RuntimeInvisibleTypeAnnotationsAttribute {
+                        num_annotations,
+                        annotations,
+                    }
+                }
+                "AnnotationDefault" => {
+                    let default_value = self.parse_element_value()?;
+
+                    AttributeInfoType::AnnotationDefaultAttribute { default_value }
+                }
+                "BootstrapMethods" => {
+                    let num_bootstrap_methods = self.next_u2()?;
+                    let mut bootstrap_methods = Vec::with_capacity(num_bootstrap_methods as usize);
+                    for _ in 0..num_bootstrap_methods {
+                        let bootstrap_method_ref = self.next_u2()?;
+                        let num_bootstrap_arguments = self.next_u2()?;
+                        let mut bootstrap_arguments =
+                            Vec::with_capacity(num_bootstrap_arguments as usize);
+                        for _ in 0..num_bootstrap_arguments {
+                            bootstrap_arguments.push(self.next_u2()?);
+                        }
+
+                        bootstrap_methods.push(BootstrapMethod {
+                            bootstrap_method_ref,
+                            num_bootstrap_arguments,
+                            bootstrap_arguments,
+                        });
+                    }
+
+                    AttributeInfoType::BootstrapMethodsAttribute {
+                        num_bootstrap_methods,
+                        bootstrap_methods,
+                    }
+                }
                 _ => todo!("implemented attribute type"),
             };
 
@@ -623,7 +720,7 @@ impl ClassFileParser {
 
             element_value_pairs.push(ElementValuePair {
                 element_name_index,
-                value
+                value,
             });
         }
 
@@ -646,7 +743,10 @@ impl ClassFileParser {
                 let type_name_index = self.next_u2()?;
                 let const_name_index = self.next_u2()?;
 
-                ElementValueValue::EnumConstValue { type_name_index, const_name_index }
+                ElementValueValue::EnumConstValue {
+                    type_name_index,
+                    const_name_index,
+                }
             }
             'c' => {
                 let class_info_index = self.next_u2()?;
@@ -671,5 +771,136 @@ impl ClassFileParser {
         };
 
         Ok(ElementValue { tag, value })
+    }
+
+    fn parse_parameter_annotation(&mut self) -> ParseResult<ParameterAnnotation> {
+        let num_annotations = self.next_u2()?;
+        let mut annotations = Vec::with_capacity(num_annotations as usize);
+        for _ in 0..num_annotations {
+            annotations.push(self.parse_annotation()?);
+        }
+
+        Ok(ParameterAnnotation {
+            num_annotations,
+            annotations,
+        })
+    }
+
+    fn parse_type_annotation(&mut self) -> ParseResult<TypeAnnotation> {
+        let target_type = self.next_u1()?;
+        let target_info = match target_type {
+            0x00 | 0x01 => {
+                let type_parameter_index = self.next_u1()?;
+
+                TypeAnnotationTargetInfo::TypeParameterTarget {
+                    type_parameter_index,
+                }
+            }
+            0x10 => {
+                let supertype_index = self.next_u2()?;
+
+                TypeAnnotationTargetInfo::SupertypeTarget { supertype_index }
+            }
+            0x11 | 0x12 => {
+                let type_parameter_index = self.next_u1()?;
+                let bound_index = self.next_u1()?;
+
+                TypeAnnotationTargetInfo::TypeParameterBoundTarget {
+                    type_parameter_index,
+                    bound_index,
+                }
+            }
+            0x13..=0x15 => TypeAnnotationTargetInfo::EmptyTarget,
+            0x16 => {
+                let formal_parameter_index = self.next_u1()?;
+
+                TypeAnnotationTargetInfo::FormalParameterTarget {
+                    formal_parameter_index,
+                }
+            }
+            0x17 => {
+                let throws_type_index = self.next_u2()?;
+
+                TypeAnnotationTargetInfo::ThrowsTarget { throws_type_index }
+            }
+            0x40 | 0x41 => {
+                let table_length = self.next_u2()?;
+                let mut table = Vec::with_capacity(table_length as usize);
+
+                for _ in 0..table_length {
+                    let start_pc = self.next_u2()?;
+                    let length = self.next_u2()?;
+                    let index = self.next_u2()?;
+
+                    table.push(TypeAnnotationLocalVarTargetTableEntry {
+                        start_pc,
+                        length,
+                        index,
+                    });
+                }
+
+                TypeAnnotationTargetInfo::LocalVarTarget {
+                    table_length,
+                    table,
+                }
+            }
+            0x42 => {
+                let catch_index = self.next_u2()?;
+
+                TypeAnnotationTargetInfo::CatchTarget { catch_index }
+            }
+            0x43..=0x46 => {
+                let offset = self.next_u2()?;
+
+                TypeAnnotationTargetInfo::OffsetTarget { offset }
+            }
+            0x47..=0x4B => {
+                let offset = self.next_u2()?;
+                let type_argument_index = self.next_u1()?;
+
+                TypeAnnotationTargetInfo::TypeArgumentTarget {
+                    offset,
+                    type_argument_index,
+                }
+            }
+            _ => unreachable!(),
+        };
+
+        let path_length = self.next_u1()?;
+        let mut path = Vec::with_capacity(path_length as usize);
+        for _ in 0..path_length {
+            let type_path_kind = self.next_u1()?;
+            let type_argument_index = self.next_u1()?;
+            let segment = TypeAnnotationTypePathSegment {
+                type_path_kind,
+                type_argument_index,
+            };
+
+            path.push(segment);
+        }
+        let target_path = TypeAnnotationTypePath { path_length, path };
+
+        let type_index = self.next_u2()?;
+
+        let num_element_value_pairs = self.next_u2()?;
+        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
+        for _ in 0..num_element_value_pairs {
+            let element_name_index = self.next_u2()?;
+            let value = self.parse_element_value()?;
+
+            element_value_pairs.push(ElementValuePair {
+                element_name_index,
+                value,
+            });
+        }
+
+        Ok(TypeAnnotation {
+            target_type,
+            target_info,
+            target_path,
+            type_index,
+            num_element_value_pairs,
+            element_value_pairs,
+        })
     }
 }

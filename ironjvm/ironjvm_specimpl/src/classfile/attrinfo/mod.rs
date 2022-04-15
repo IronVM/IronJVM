@@ -29,8 +29,8 @@ pub mod lvttattr;
 pub mod mattr;
 pub mod mpattr;
 pub mod rattr;
-pub mod ripaattr;
 pub mod rvanriaattr;
+pub mod rvpaattr;
 pub mod rvtnritaattr;
 pub mod smtattr;
 
@@ -95,9 +95,13 @@ pub enum AttributeInfoType {
         num_annotations: u16,
         annotations: Vec<rvanriaattr::Annotation>,
     },
+    RuntimeVisibleParameterAnnotationsAttribute {
+        num_parameters: u16,
+        parameter_annotations: Vec<rvpaattr::ParameterAnnotation>,
+    },
     RuntimeInvisibleParameterAnnotationsAttribute {
         num_parameters: u16,
-        parameter_annotations: Vec<ripaattr::ParameterAnnotation>,
+        parameter_annotations: Vec<rvpaattr::ParameterAnnotation>,
     },
     RuntimeVisibleTypeAnnotationsAttribute {
         num_annotations: u16,
@@ -108,7 +112,7 @@ pub enum AttributeInfoType {
         annotations: Vec<rvtnritaattr::TypeAnnotation>,
     },
     AnnotationDefaultAttribute {
-        element_value: rvanriaattr::ElementValue,
+        default_value: rvanriaattr::ElementValue,
     },
     BootstrapMethodsAttribute {
         num_bootstrap_methods: u16,

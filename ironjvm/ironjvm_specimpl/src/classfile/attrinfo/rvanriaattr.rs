@@ -30,11 +30,23 @@ pub struct ElementValue {
 }
 
 pub enum ElementValueValue {
-    ConstValueIndex { const_value_index: u16 },
-    EnumConstValue { type_name_index: u16, const_name_index: u16 },
-    ClassInfoIndex { class_info_index: u16 },
-    AnnotationValue { annotation_value: Annotation },
-    ArrayValue { num_values: u16, values: Vec<ElementValue> },
+    ConstValueIndex {
+        const_value_index: u16,
+    },
+    EnumConstValue {
+        type_name_index: u16,
+        const_name_index: u16,
+    },
+    ClassInfoIndex {
+        class_info_index: u16,
+    },
+    AnnotationValue {
+        annotation_value: Annotation,
+    },
+    ArrayValue {
+        num_values: u16,
+        values: Vec<ElementValue>,
+    },
 }
 
 pub struct ElementValuePair {
