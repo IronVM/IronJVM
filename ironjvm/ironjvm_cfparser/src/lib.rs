@@ -42,6 +42,8 @@ use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, Verification
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::attrinfo::mattr::{ModuleExport, ModuleOpen, ModuleProvide, ModuleRequire};
+use ironjvm_specimpl::classfile::attrinfo::mpattr::MethodParameter;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -553,9 +555,7 @@ impl ClassFileParser {
                         let num_bootstrap_arguments = self.next_u2()?;
                         let mut bootstrap_arguments =
                             Vec::with_capacity(num_bootstrap_arguments as usize);
-                        for _ in 0..num_bootstrap_arguments {
-                            bootstrap_arguments.push(self.next_u2()?);
-                        }
+                        self.classfile.read_u16_into::<BigEndian>(bootstrap_arguments.as_mut_slice());
 
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref,
@@ -567,6 +567,112 @@ impl ClassFileParser {
                     AttributeInfoType::BootstrapMethodsAttribute {
                         num_bootstrap_methods,
                         bootstrap_methods,
+                    }
+                }
+                "MethodParameters" => {
+                    let parameters_count = self.next_u1()?;
+                    let mut parameters = Vec::with_capacity(parameters_count as usize);
+                    for _ in 0..parameters_count {
+                        let name_index = self.next_u2()?;
+                        let access_flags = self.next_u2()?;
+
+                        parameters.push(MethodParameter {
+                            name_index,
+                            access_flags,
+                        });
+                    }
+
+                    AttributeInfoType::MethodParametersAttribute {
+                        parameters_count,
+                        parameters
+                    }
+                }
+                "Module" => {
+                    let module_name_index = self.next_u2()?;
+                    let module_flags = self.next_u2()?;
+                    let module_version_index = self.next_u2()?;
+
+                    let requires_count = self.next_u2()?;
+                    let mut requires = Vec::with_capacity(requires_count as usize);
+                    for _ in 0..requires_count {
+                        let requires_index = self.next_u2()?;
+                        let requires_flags = self.next_u2()?;
+                        let requires_version_index = self.next_u2()?;
+
+                        requires.push(ModuleRequire {
+                            requires_index,
+                            requires_flags,
+                            requires_version_index,
+                        });
+                    }
+
+                    let exports_count = self.next_u2()?;
+                    let mut exports = Vec::with_capacity(exports_count as usize);
+                    for _ in 0..exports_count {
+                        let exports_index = self.next_u2()?;
+                        let exports_flags = self.next_u2()?;
+                        let exports_to_count = self.next_u2()?;
+                        let mut exports_to_index = Vec::with_capacity(exports_to_count as usize);
+                        self.classfile.read_u16_into::<BigEndian>(exports_to_index.as_mut_slice());
+
+                        exports.push(ModuleExport {
+                            exports_index,
+                            exports_flags,
+                            exports_to_count,
+                            exports_to_index
+                        });
+                    }
+
+                    let opens_count = self.next_u2()?;
+                    let mut opens = Vec::with_capacity(opens_count as usize);
+                    for _ in 0..exports_count {
+                        let opens_index = self.next_u2()?;
+                        let opens_flags = self.next_u2()?;
+                        let opens_to_count = self.next_u2()?;
+                        let mut opens_to_index = Vec::with_capacity(opens_to_count as usize);
+                        self.classfile.read_u16_into::<BigEndian>(opens_to_index.as_mut_slice());
+
+                        opens.push(ModuleOpen {
+                            opens_index,
+                            opens_flags,
+                            opens_to_count,
+                            opens_to_index,
+                        });
+                    }
+
+                    let uses_count = self.next_u2()?;
+                    let mut uses_index = Vec::with_capacity(uses_count as usize);
+                    self.classfile.read_u16_into::<BigEndian>(uses_index.as_mut_slice());
+
+                    let provides_count = self.next_u2()?;
+                    let mut provides = Vec::with_capacity(provides_count as usize);
+                    for _ in 0..provides_count {
+                        let provides_index = self.next_u2()?;
+                        let provides_with_count = self.next_u2()?;
+                        let mut provides_with_index = Vec::with_capacity(provides_with_count as usize);
+                        self.classfile.read_u16_into(provides_with_index.as_mut_slice());
+
+                        provides.push(ModuleProvide {
+                            provides_index,
+                            provides_with_count,
+                            provides_with_index
+                        });
+                    }
+
+                    AttributeInfoType::ModuleAttribute {
+                        module_name_index,
+                        module_flags,
+                        module_version_index,
+                        requires_count,
+                        requires,
+                        exports_count,
+                        exports,
+                        opens_count,
+                        opens,
+                        uses_count,
+                        uses_index,
+                        provides_count,
+                        provides
                     }
                 }
                 _ => todo!("implemented attribute type"),
