@@ -760,7 +760,7 @@ impl ClassFileParser {
                         classes,
                     }
                 }
-                _ => todo!("implemented attribute type"),
+                _ => unreachable!(),
             };
 
             vec.push(AttributeInfo {
