@@ -111,7 +111,7 @@ impl ClassFileParser {
             let info = match tag {
                 1 => {
                     let length = self.next_u2()?;
-                    let mut bytes = Vec::with_capacity(length as usize);
+                    let mut bytes = vec![0; length as usize];
                     self.classfile.read_exact(bytes.as_mut_slice());
 
                     CpInfoType::ConstantUtf8 { length, bytes }
@@ -242,7 +242,7 @@ impl ClassFileParser {
     }
 
     fn parse_interfaces(&mut self, count: u16) -> ParseResult<Vec<u16>> {
-        let mut vec = Vec::with_capacity(count as usize);
+        let mut vec = vec![0; count as usize];
         self.classfile
             .read_u16_into::<BigEndian>(vec.as_mut_slice())?;
 
@@ -308,7 +308,7 @@ impl ClassFileParser {
                     let max_locals = self.next_u2()?;
                     let code_length = self.next_u4()?;
 
-                    let mut code = Vec::with_capacity(code_length as usize);
+                    let mut code =vec![0; code_length as usize];
                     self.classfile.read_exact(code.as_mut_slice())?;
 
                     let exception_table_length = self.next_u2()?;
@@ -342,8 +342,7 @@ impl ClassFileParser {
                 }
                 "Exceptions" => {
                     let number_of_exceptions = self.next_u2()?;
-                    let mut exception_index_table =
-                        Vec::with_capacity(number_of_exceptions as usize);
+                    let mut exception_index_table = vec![0; number_of_exceptions as usize];
                     self.classfile
                         .read_u16_into::<BigEndian>(exception_index_table.as_mut_slice())?;
 
@@ -395,7 +394,7 @@ impl ClassFileParser {
                     AttributeInfoType::SourceFileAttribute { sourcefile_index }
                 }
                 "SourceDebugExtension" => {
-                    let mut debug_extension = Vec::with_capacity(attribute_length as usize);
+                    let mut debug_extension = vec![0; attribute_length as usize];
                     self.classfile.read_exact(debug_extension.as_mut_slice())?;
 
                     AttributeInfoType::SourceDebugExtensionAttribute { debug_extension }
@@ -553,8 +552,7 @@ impl ClassFileParser {
                     for _ in 0..num_bootstrap_methods {
                         let bootstrap_method_ref = self.next_u2()?;
                         let num_bootstrap_arguments = self.next_u2()?;
-                        let mut bootstrap_arguments =
-                            Vec::with_capacity(num_bootstrap_arguments as usize);
+                        let mut bootstrap_arguments = vec![0; num_bootstrap_arguments as usize];
                         self.classfile.read_u16_into::<BigEndian>(bootstrap_arguments.as_mut_slice());
 
                         bootstrap_methods.push(BootstrapMethod {
@@ -612,7 +610,7 @@ impl ClassFileParser {
                         let exports_index = self.next_u2()?;
                         let exports_flags = self.next_u2()?;
                         let exports_to_count = self.next_u2()?;
-                        let mut exports_to_index = Vec::with_capacity(exports_to_count as usize);
+                        let mut exports_to_index = vec![0; exports_to_count as usize];
                         self.classfile.read_u16_into::<BigEndian>(exports_to_index.as_mut_slice());
 
                         exports.push(ModuleExport {
@@ -629,7 +627,7 @@ impl ClassFileParser {
                         let opens_index = self.next_u2()?;
                         let opens_flags = self.next_u2()?;
                         let opens_to_count = self.next_u2()?;
-                        let mut opens_to_index = Vec::with_capacity(opens_to_count as usize);
+                        let mut opens_to_index = vec![0; opens_to_count as usize];
                         self.classfile.read_u16_into::<BigEndian>(opens_to_index.as_mut_slice());
 
                         opens.push(ModuleOpen {
@@ -641,7 +639,7 @@ impl ClassFileParser {
                     }
 
                     let uses_count = self.next_u2()?;
-                    let mut uses_index = Vec::with_capacity(uses_count as usize);
+                    let mut uses_index = vec![0; uses_count as usize];
                     self.classfile.read_u16_into::<BigEndian>(uses_index.as_mut_slice());
 
                     let provides_count = self.next_u2()?;
@@ -649,7 +647,7 @@ impl ClassFileParser {
                     for _ in 0..provides_count {
                         let provides_index = self.next_u2()?;
                         let provides_with_count = self.next_u2()?;
-                        let mut provides_with_index = Vec::with_capacity(provides_with_count as usize);
+                        let mut provides_with_index = vec![0; provides_with_count as usize];
                         self.classfile.read_u16_into(provides_with_index.as_mut_slice());
 
                         provides.push(ModuleProvide {
