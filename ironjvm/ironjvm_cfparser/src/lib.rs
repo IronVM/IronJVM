@@ -46,7 +46,7 @@ use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::{
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo, MethodInfo};
 
 use crate::error::{ParseError, ParseResult};
 
@@ -73,8 +73,30 @@ impl ClassFileParser {
         let interfaces_count = self.next_u2()?;
         let interfaces = self.parse_interfaces(interfaces_count)?;
         let fields_count = self.next_u2()?;
+        let fields = self.parse_fields(fields_count, &constant_pool)?;
+        let methods_count = self.next_u2()?;
+        let methods = self.parse_methods(methods_count, &constant_pool)?;
+        let attributes_count = self.next_u2()?;
+        let attributes = self.parse_attributes(attributes_count, &constant_pool)?;
 
-        todo!()
+        Ok(ClassFile {
+            magic,
+            minor_version,
+            major_version,
+            constant_pool_count,
+            constant_pool,
+            access_flags,
+            this_class,
+            super_class,
+            interfaces_count,
+            interfaces,
+            fields_count,
+            fields,
+            methods_count,
+            methods,
+            attributes_count,
+            attributes
+        })
     }
 
     fn next_u1(&mut self) -> ParseResult<u8> {
@@ -1071,5 +1093,27 @@ impl ClassFileParser {
             num_element_value_pairs,
             element_value_pairs,
         })
+    }
+
+    fn parse_methods(&mut self, count: u16, constant_pool: &[CpInfo]) -> ParseResult<Vec<MethodInfo>> {
+        let mut vec = Vec::with_capacity(count as usize);
+
+        for _ in 0..count {
+            let access_flags = self.next_u2()?;
+            let name_index = self.next_u2()?;
+            let descriptor_index = self.next_u2()?;
+            let attributes_count = self.next_u2()?;
+            let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+
+            vec.push(MethodInfo {
+                access_flags,
+                name_index,
+                descriptor_index,
+                attributes_count,
+                attributes,
+            });
+        }
+
+        Ok(vec)
     }
 }
