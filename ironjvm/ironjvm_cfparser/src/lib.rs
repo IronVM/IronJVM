@@ -46,6 +46,7 @@ use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, Verification
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
+use ironjvm_specimpl::classfile::attrinfo::rattr::RecordComponentInfo;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -678,6 +679,67 @@ impl ClassFileParser {
                         uses_index,
                         provides_count,
                         provides,
+                    }
+                }
+                "ModulePackages" => {
+                    let package_count = self.next_u2()?;
+                    let mut package_index = vec![0; package_count as usize];
+                    self.classfile.read_u16_into(package_index.as_mut_slice());
+
+                    AttributeInfoType::ModulePackagesAttribute {
+                        package_count,
+                        package_index
+                    }
+                }
+                "ModuleMainClass" => {
+                    let main_class_index = self.next_u2()?;
+
+                    AttributeInfoType::ModuleMainClassAttribute {
+                        main_class_index
+                    }
+                }
+                "NestHost" => {
+                    let host_class_index = self.next_u2()?;
+
+                    AttributeInfoType::NestHostAttribute {
+                        host_class_index
+                    }
+                }
+                "NestMembers" => {
+                    let number_of_classes = self.next_u2()?;
+                    let mut classes = vec![0; number_of_classes as usize];
+                    self.classfile.read_u16_into(classes.as_mut_slice());
+
+                    AttributeInfoType::NestMembersAttribute {
+                        number_of_classes,
+                        classes,
+                    }
+                }
+                "Record" => {
+                    let components_count = self.next_u2()?;
+                    let mut components = Vec::with_capacity(components_count as usize);
+                    for _ in 0..components_count {
+                        let name_index = self.next_u2()?;
+                        let descriptor_index = self.next_u2()?;
+                        let attributes_count = self.next_u2()?;
+                        let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+
+                        components.push(RecordComponentInfo {
+                            name_index,
+                            descriptor_index,
+                            attributes_count,
+                            attributes
+                        });
+                    }
+                }
+                "PermittedSubclasses" => {
+                    let number_of_classes = self.next_u2()?;
+                    let mut classes = vec![0; number_of_classes as usize];
+                    self.classfile.read_u16_into(classes.as_mut_slice());
+
+                    AttributeInfoType::PermittedSubclassesAttribute {
+                        number_of_classes,
+                        classes,
                     }
                 }
                 _ => todo!("implemented attribute type"),
