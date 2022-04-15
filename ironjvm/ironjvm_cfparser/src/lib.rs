@@ -30,6 +30,10 @@ use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
 use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
 use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
+use ironjvm_specimpl::classfile::attrinfo::mattr::{
+    ModuleExport, ModuleOpen, ModuleProvide, ModuleRequire,
+};
+use ironjvm_specimpl::classfile::attrinfo::mpattr::MethodParameter;
 use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{
     Annotation, ElementValue, ElementValuePair, ElementValueValue,
 };
@@ -42,8 +46,6 @@ use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, Verification
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
-use ironjvm_specimpl::classfile::attrinfo::mattr::{ModuleExport, ModuleOpen, ModuleProvide, ModuleRequire};
-use ironjvm_specimpl::classfile::attrinfo::mpattr::MethodParameter;
 
 use crate::error::{ParseError, ParseResult};
 
@@ -308,7 +310,7 @@ impl ClassFileParser {
                     let max_locals = self.next_u2()?;
                     let code_length = self.next_u4()?;
 
-                    let mut code =vec![0; code_length as usize];
+                    let mut code = vec![0; code_length as usize];
                     self.classfile.read_exact(code.as_mut_slice())?;
 
                     let exception_table_length = self.next_u2()?;
@@ -553,7 +555,8 @@ impl ClassFileParser {
                         let bootstrap_method_ref = self.next_u2()?;
                         let num_bootstrap_arguments = self.next_u2()?;
                         let mut bootstrap_arguments = vec![0; num_bootstrap_arguments as usize];
-                        self.classfile.read_u16_into::<BigEndian>(bootstrap_arguments.as_mut_slice());
+                        self.classfile
+                            .read_u16_into::<BigEndian>(bootstrap_arguments.as_mut_slice());
 
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref,
@@ -582,7 +585,7 @@ impl ClassFileParser {
 
                     AttributeInfoType::MethodParametersAttribute {
                         parameters_count,
-                        parameters
+                        parameters,
                     }
                 }
                 "Module" => {
@@ -611,13 +614,14 @@ impl ClassFileParser {
                         let exports_flags = self.next_u2()?;
                         let exports_to_count = self.next_u2()?;
                         let mut exports_to_index = vec![0; exports_to_count as usize];
-                        self.classfile.read_u16_into::<BigEndian>(exports_to_index.as_mut_slice());
+                        self.classfile
+                            .read_u16_into::<BigEndian>(exports_to_index.as_mut_slice());
 
                         exports.push(ModuleExport {
                             exports_index,
                             exports_flags,
                             exports_to_count,
-                            exports_to_index
+                            exports_to_index,
                         });
                     }
 
@@ -628,7 +632,8 @@ impl ClassFileParser {
                         let opens_flags = self.next_u2()?;
                         let opens_to_count = self.next_u2()?;
                         let mut opens_to_index = vec![0; opens_to_count as usize];
-                        self.classfile.read_u16_into::<BigEndian>(opens_to_index.as_mut_slice());
+                        self.classfile
+                            .read_u16_into::<BigEndian>(opens_to_index.as_mut_slice());
 
                         opens.push(ModuleOpen {
                             opens_index,
@@ -640,7 +645,8 @@ impl ClassFileParser {
 
                     let uses_count = self.next_u2()?;
                     let mut uses_index = vec![0; uses_count as usize];
-                    self.classfile.read_u16_into::<BigEndian>(uses_index.as_mut_slice());
+                    self.classfile
+                        .read_u16_into::<BigEndian>(uses_index.as_mut_slice());
 
                     let provides_count = self.next_u2()?;
                     let mut provides = Vec::with_capacity(provides_count as usize);
@@ -648,12 +654,13 @@ impl ClassFileParser {
                         let provides_index = self.next_u2()?;
                         let provides_with_count = self.next_u2()?;
                         let mut provides_with_index = vec![0; provides_with_count as usize];
-                        self.classfile.read_u16_into(provides_with_index.as_mut_slice());
+                        self.classfile
+                            .read_u16_into(provides_with_index.as_mut_slice());
 
                         provides.push(ModuleProvide {
                             provides_index,
                             provides_with_count,
-                            provides_with_index
+                            provides_with_index,
                         });
                     }
 
@@ -670,7 +677,7 @@ impl ClassFileParser {
                         uses_count,
                         uses_index,
                         provides_count,
-                        provides
+                        provides,
                     }
                 }
                 _ => todo!("implemented attribute type"),
