@@ -75,11 +75,9 @@ impl ClassFileParser {
         let fields_count = self.next_u2()?;
         let fields = self.parse_fields(fields_count, &constant_pool)?;
         let methods_count = self.next_u2()?;
-        // let methods = self.parse_methods(methods_count, &constant_pool)?;
-        let methods = Vec::new();
+        let methods = self.parse_methods(methods_count, &constant_pool)?;
         let attributes_count = self.next_u2()?;
-        // let attributes = self.parse_attributes(attributes_count, &constant_pool)?;
-        let attributes = Vec::new();
+        let attributes = self.parse_attributes(attributes_count, &constant_pool)?;
 
         Ok(ClassFile {
             magic,
@@ -313,7 +311,7 @@ impl ClassFileParser {
             let attribute_name_index = self.next_u2()?;
             let attribute_length = self.next_u4()?;
 
-            let name_cp_info = &constant_pool[attribute_name_index as usize].info;
+            let name_cp_info = &constant_pool[attribute_name_index as usize - 1].info;
             let CpInfoType::ConstantUtf8 { bytes, .. } = name_cp_info else {
                 unreachable!()
             };
