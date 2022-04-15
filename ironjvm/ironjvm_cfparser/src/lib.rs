@@ -22,32 +22,30 @@
 
 use byteorder::{BigEndian, ReadBytesExt};
 use std::fs::File;
-use std::io::{Cursor, Read};
+use std::io::Read;
 
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
 use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
+use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::Annotation;
 use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo};
-use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
-use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::Annotation;
 
 use crate::error::{ParseError, ParseResult};
 
 mod error;
 
 pub struct ClassFileParser {
-    pub classfile: Cursor<File>,
+    pub classfile: File,
 }
 
 impl ClassFileParser {
     pub fn new(classfile: File) -> Self {
-        Self {
-            classfile: Cursor::new(classfile),
-        }
+        Self { classfile }
     }
 
     pub fn parse(mut self) -> ParseResult<ClassFile> {
