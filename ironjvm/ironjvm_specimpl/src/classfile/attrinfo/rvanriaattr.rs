@@ -18,17 +18,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#[derive(Debug)]
 pub struct Annotation {
     pub type_index: u16,
     pub num_element_value_pairs: u16,
     pub element_value_pairs: Vec<ElementValuePair>,
 }
 
+#[derive(Debug)]
 pub struct ElementValue {
     pub tag: u8,
     pub value: ElementValueValue,
 }
 
+#[derive(Debug)]
 pub enum ElementValueValue {
     ConstValueIndex {
         const_value_index: u16,
@@ -49,6 +52,7 @@ pub enum ElementValueValue {
     },
 }
 
+#[derive(Debug)]
 pub struct ElementValuePair {
     pub element_name_index: u16,
     pub value: ElementValue,

@@ -20,6 +20,7 @@
 
 use super::rvanriaattr;
 
+#[derive(Debug)]
 pub struct TypeAnnotation {
     pub target_type: u8,
     pub target_info: TypeAnnotationTargetInfo,
@@ -29,6 +30,7 @@ pub struct TypeAnnotation {
     pub element_value_pairs: Vec<rvanriaattr::ElementValuePair>,
 }
 
+#[derive(Debug)]
 pub enum TypeAnnotationTargetInfo {
     TypeParameterTarget {
         type_parameter_index: u8,
@@ -63,17 +65,20 @@ pub enum TypeAnnotationTargetInfo {
     },
 }
 
+#[derive(Debug)]
 pub struct TypeAnnotationLocalVarTargetTableEntry {
     pub start_pc: u16,
     pub length: u16,
     pub index: u16,
 }
 
+#[derive(Debug)]
 pub struct TypeAnnotationTypePath {
     pub path_length: u8,
     pub path: Vec<TypeAnnotationTypePathSegment>,
 }
 
+#[derive(Debug)]
 pub struct TypeAnnotationTypePathSegment {
     pub type_path_kind: u8,
     pub type_argument_index: u8,

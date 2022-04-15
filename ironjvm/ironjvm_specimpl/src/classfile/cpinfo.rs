@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#[derive(Debug)]
 #[repr(u8)]
 pub enum CpInfoType {
     ConstantUtf8 {

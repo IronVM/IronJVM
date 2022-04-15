@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#[derive(Debug)]
 pub enum StackMapFrame {
     SameFrame {
         frame_type: u8,
@@ -54,6 +55,7 @@ pub enum StackMapFrame {
     },
 }
 
+#[derive(Debug)]
 pub enum VerificationTypeInfo {
     TopVariableInfo { tag: u8 },
     IntegerVariableInfo { tag: u8 },

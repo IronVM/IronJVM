@@ -18,6 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#[derive(Debug)]
 pub struct LocalVariableType {
     pub start_pc: u16,
     pub length: u16,

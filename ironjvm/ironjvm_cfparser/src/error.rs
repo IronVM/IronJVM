@@ -20,6 +20,7 @@
 
 use std::io::Error;
 
+#[derive(Debug)]
 pub enum ParseError {
     InvalidMagic,
     IoError { src: Error },
