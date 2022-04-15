@@ -95,7 +95,7 @@ impl ClassFileParser {
             methods_count,
             methods,
             attributes_count,
-            attributes
+            attributes,
         })
     }
 
@@ -1095,7 +1095,11 @@ impl ClassFileParser {
         })
     }
 
-    fn parse_methods(&mut self, count: u16, constant_pool: &[CpInfo]) -> ParseResult<Vec<MethodInfo>> {
+    fn parse_methods(
+        &mut self,
+        count: u16,
+        constant_pool: &[CpInfo],
+    ) -> ParseResult<Vec<MethodInfo>> {
         let mut vec = Vec::with_capacity(count as usize);
 
         for _ in 0..count {
