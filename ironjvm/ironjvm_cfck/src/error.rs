@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#[derive(Clone, Debug)]
-pub enum CheckError {}
+#[derive(Debug)]
+pub enum CheckError {
+    UnsupportedMajor { major: u16 }
+}
 
 pub type CheckResult<T> = Result<T, CheckError>;

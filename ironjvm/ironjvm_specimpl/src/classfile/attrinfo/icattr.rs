@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct InnerClass {
     pub inner_class_info_index: u16,
     pub outer_class_info_index: u16,

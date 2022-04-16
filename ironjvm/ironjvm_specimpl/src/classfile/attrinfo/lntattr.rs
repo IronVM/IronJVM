@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct LineNumber {
     pub start_pc: u16,
     pub line_number: u16,

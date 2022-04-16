@@ -20,14 +20,30 @@
 
 use ironjvm_specimpl::classfile::ClassFile;
 
+use crate::error::{CheckError, CheckResult};
+
 mod error;
 
 pub struct ClassFileChecker {
-    classfile: ClassFile
+    classfile: ClassFile,
 }
 
 impl ClassFileChecker {
-    pub fn new(classfile: &ClassFile) -> Self {
-        Self { classfile: classfile.clone() }
+    pub fn new(classfile: ClassFile) -> Self {
+        Self { classfile }
+    }
+
+    pub fn check(&self) -> CheckResult<()> {
+        self.check_cfver()?;
+
+        Ok(())
+    }
+
+    fn check_cfver(&self) -> CheckResult<()> {
+        if (45u16..=62u16).contains(&self.classfile.major_version) {
+            return Ok(());
+        }
+
+        Err(CheckError::UnsupportedMajor { major: self.classfile.major_version })
     }
 }

@@ -34,7 +34,7 @@ pub mod rvpaattr;
 pub mod rvtnritaattr;
 pub mod smtattr;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub enum AttributeInfoType {
     ConstantValueAttribute {
         constantvalue_index: u16,
