@@ -17,3 +17,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+use ironjvm_specimpl::classfile::ClassFile;
+
+mod error;
+
+pub struct ClassFileChecker {
+    classfile: ClassFile
+}
+
+impl ClassFileChecker {
+    pub fn new(classfile: &ClassFile) -> Self {
+        Self { classfile: classfile.clone() }
+    }
+}

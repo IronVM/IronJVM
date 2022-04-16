@@ -53,7 +53,7 @@ use crate::error::{ParseError, ParseResult};
 mod error;
 
 pub struct ClassFileParser {
-    pub classfile: File,
+    classfile: File,
 }
 
 impl ClassFileParser {

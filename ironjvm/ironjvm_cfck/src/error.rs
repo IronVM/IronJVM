@@ -18,12 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use crate::classfile;
-
 #[derive(Clone, Debug)]
-pub struct RecordComponentInfo {
-    pub name_index: u16,
-    pub descriptor_index: u16,
-    pub attributes_count: u16,
-    pub attributes: Vec<classfile::AttributeInfo>,
-}
+pub enum CheckError {}
+
+pub type CheckResult<T> = Result<T, CheckError>;

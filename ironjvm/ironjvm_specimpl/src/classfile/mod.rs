@@ -22,14 +22,14 @@ pub mod attrinfo;
 pub mod cpinfo;
 pub mod flags;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeInfo {
     pub attribute_name_index: u16,
     pub attribute_length: u32,
     pub info: attrinfo::AttributeInfoType,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ClassFile {
     pub magic: u32,
     pub minor_version: u16,
@@ -49,13 +49,13 @@ pub struct ClassFile {
     pub attributes: Vec<AttributeInfo>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CpInfo {
     pub tag: u8,
     pub info: cpinfo::CpInfoType,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct FieldInfo {
     pub access_flags: u16,
     pub name_index: u16,
@@ -64,7 +64,7 @@ pub struct FieldInfo {
     pub attributes: Vec<AttributeInfo>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MethodInfo {
     pub access_flags: u16,
     pub name_index: u16,
