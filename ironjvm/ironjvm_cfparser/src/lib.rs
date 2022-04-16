@@ -706,7 +706,8 @@ impl ClassFileParser {
                 "ModulePackages" => {
                     let package_count = self.next_u2()?;
                     let mut package_index = vec![0; package_count as usize];
-                    self.classfile.read_u16_into::<BigEndian>(package_index.as_mut_slice())?;
+                    self.classfile
+                        .read_u16_into::<BigEndian>(package_index.as_mut_slice())?;
 
                     AttributeInfoType::ModulePackagesAttribute {
                         package_count,
@@ -726,7 +727,8 @@ impl ClassFileParser {
                 "NestMembers" => {
                     let number_of_classes = self.next_u2()?;
                     let mut classes = vec![0; number_of_classes as usize];
-                    self.classfile.read_u16_into::<BigEndian>(classes.as_mut_slice())?;
+                    self.classfile
+                        .read_u16_into::<BigEndian>(classes.as_mut_slice())?;
 
                     AttributeInfoType::NestMembersAttribute {
                         number_of_classes,
@@ -758,7 +760,8 @@ impl ClassFileParser {
                 "PermittedSubclasses" => {
                     let number_of_classes = self.next_u2()?;
                     let mut classes = vec![0; number_of_classes as usize];
-                    self.classfile.read_u16_into::<BigEndian>(classes.as_mut_slice())?;
+                    self.classfile
+                        .read_u16_into::<BigEndian>(classes.as_mut_slice())?;
 
                     AttributeInfoType::PermittedSubclassesAttribute {
                         number_of_classes,
