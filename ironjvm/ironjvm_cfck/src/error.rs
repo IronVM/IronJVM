@@ -23,9 +23,11 @@ pub enum CheckError {
     AnnotationFlagWithoutInterfaceFlag,
     FinalAbstractFlagsSetSimultaneously,
     InterfaceFlagWithoutAbstractFlag,
+    InvalidConstantPoolIndex,
     InvalidFlagsWithInterfaceFlag,
     InvalidMinor { minor: u16 },
     NotOnlyModuleFlagSet,
+    ThisClassIndexNotConstantClass,
     UnsupportedMajor { major: u16 },
     UnsupportedModuleFlagForVersion,
 }

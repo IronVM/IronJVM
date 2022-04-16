@@ -18,8 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use ironjvm_specimpl::classfile::ClassFile;
+#![feature(let_else)]
+
 use ironjvm_specimpl::classfile::flags::{ClassAccessFlags, FlagsExt};
+use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 
 use crate::error::{CheckError, CheckResult};
 
@@ -37,6 +40,7 @@ impl ClassFileChecker {
     pub fn check(&self) -> CheckResult<()> {
         self.check_cfver()?;
         let is_module = self.check_class_accflags()?;
+        self.check_this_class()?;
 
         todo!()
     }
@@ -59,7 +63,11 @@ impl ClassFileChecker {
     }
 
     fn check_class_accflags(&self) -> CheckResult<bool> {
-        if self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_MODULE) {
+        if self
+            .classfile
+            .access_flags
+            .flag_set(ClassAccessFlags::ACC_MODULE)
+        {
             if self.classfile.access_flags != ClassAccessFlags::ACC_MODULE {
                 return Err(CheckError::NotOnlyModuleFlagSet);
             }
@@ -71,27 +79,72 @@ impl ClassFileChecker {
             return Ok(true);
         }
 
-        if self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_INTERFACE) {
-            if !self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_ABSTRACT) {
+        if self
+            .classfile
+            .access_flags
+            .flag_set(ClassAccessFlags::ACC_INTERFACE)
+        {
+            if !self
+                .classfile
+                .access_flags
+                .flag_set(ClassAccessFlags::ACC_ABSTRACT)
+            {
                 return Err(CheckError::InterfaceFlagWithoutAbstractFlag);
             }
 
-            if self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_FINAL) ||
-                self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_SUPER) ||
-                self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_ENUM) ||
-                self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_MODULE) {
+            if self
+                .classfile
+                .access_flags
+                .flag_set(ClassAccessFlags::ACC_FINAL)
+                || self
+                    .classfile
+                    .access_flags
+                    .flag_set(ClassAccessFlags::ACC_SUPER)
+                || self
+                    .classfile
+                    .access_flags
+                    .flag_set(ClassAccessFlags::ACC_ENUM)
+                || self
+                    .classfile
+                    .access_flags
+                    .flag_set(ClassAccessFlags::ACC_MODULE)
+            {
                 return Err(CheckError::InvalidFlagsWithInterfaceFlag);
             }
         }
 
-        if self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_ABSTRACT | ClassAccessFlags::ACC_FINAL) {
+        if self
+            .classfile
+            .access_flags
+            .flag_set(ClassAccessFlags::ACC_ABSTRACT | ClassAccessFlags::ACC_FINAL)
+        {
             return Err(CheckError::FinalAbstractFlagsSetSimultaneously);
         }
 
-        if self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_ANNOTATION) && !self.classfile.access_flags.flag_set(ClassAccessFlags::ACC_INTERFACE) {
+        if self
+            .classfile
+            .access_flags
+            .flag_set(ClassAccessFlags::ACC_ANNOTATION)
+            && !self
+                .classfile
+                .access_flags
+                .flag_set(ClassAccessFlags::ACC_INTERFACE)
+        {
             return Err(CheckError::AnnotationFlagWithoutInterfaceFlag);
         }
 
         Ok(false)
+    }
+
+    fn check_this_class(&self) -> CheckResult<()> {
+        let Some(cp_info) = self.classfile.constant_pool.get((self.classfile.this_class - 1) as usize) else {
+            return Err(CheckError::InvalidConstantPoolIndex);
+        };
+
+        let CpInfoType::ConstantClass { .. } = cp_info.info else {
+            return Err(CheckError::ThisClassIndexNotConstantClass);
+        };
+
+        Ok(())
     }
 }
