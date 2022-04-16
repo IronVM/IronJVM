@@ -34,16 +34,18 @@ impl ClassFileChecker {
     }
 
     pub fn check(&self) -> CheckResult<()> {
-        self.check_cfver()?;
-
-        Ok(())
+        self.check_cfver()
     }
 
     fn check_cfver(&self) -> CheckResult<()> {
-        if (45u16..=62u16).contains(&self.classfile.major_version) {
-            return Ok(());
+        if !(45u16..=62u16).contains(&self.classfile.major_version) {
+            return Err(CheckError::UnsupportedMajor { major: self.classfile.major_version });
         }
 
-        Err(CheckError::UnsupportedMajor { major: self.classfile.major_version })
+        if self.classfile.major_version > 56 && ![0, 65535].contains(&self.classfile.minor_version) {
+            return Err(CheckError::InvalidMinor { minor: self.classfile.minor_version })
+        }
+
+        Ok(())
     }
 }

@@ -20,7 +20,8 @@
 
 #[derive(Debug)]
 pub enum CheckError {
-    UnsupportedMajor { major: u16 }
+    InvalidMinor { minor: u16 },
+    UnsupportedMajor { major: u16 },
 }
 
 pub type CheckResult<T> = Result<T, CheckError>;
