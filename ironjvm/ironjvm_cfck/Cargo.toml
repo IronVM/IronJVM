@@ -1,0 +1,15 @@
+[package]
+name = "ironjvm_cfck"
+authors = ["HTGAzureX1212."]
+version = "18.0.0"
+description = "Java classfile checker for IronJVM"
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]
+ironjvm_specimpl = { path = "../ironjvm_specimpl" }
+
+byteorder = "1.4.3"
+
+[dev-dependencies]
+expect-test = "1.2.2"
