@@ -116,3 +116,13 @@ impl ModuleRequireFlags {
     pub const SYNTHETIC: u16 = 0x1000;
     pub const ACC_MANDATED: u16 = 0x8000;
 }
+
+pub trait FlagsExt {
+    fn flag_set(self, flag: Self) -> bool;
+}
+
+impl FlagsExt for u16 {
+    fn flag_set(self, flag: Self) -> bool {
+        self & flag != 0
+    }
+}

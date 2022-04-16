@@ -20,8 +20,14 @@
 
 #[derive(Debug)]
 pub enum CheckError {
+    AnnotationFlagWithoutInterfaceFlag,
+    FinalAbstractFlagsSetSimultaneously,
+    InterfaceFlagWithoutAbstractFlag,
+    InvalidFlagsWithInterfaceFlag,
     InvalidMinor { minor: u16 },
+    NotOnlyModuleFlagSet,
     UnsupportedMajor { major: u16 },
+    UnsupportedModuleFlagForVersion,
 }
 
 pub type CheckResult<T> = Result<T, CheckError>;
