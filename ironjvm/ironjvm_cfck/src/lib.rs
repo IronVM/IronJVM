@@ -20,9 +20,9 @@
 
 #![feature(let_else)]
 
+use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::flags::{ClassAccessFlags, FlagsExt};
 use ironjvm_specimpl::classfile::ClassFile;
-use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 
 use crate::error::{CheckError, CheckResult};
 
@@ -30,19 +30,21 @@ mod error;
 
 pub struct ClassFileChecker {
     classfile: ClassFile,
+    state: ClassFileCheckerState,
 }
 
 impl ClassFileChecker {
     pub fn new(classfile: ClassFile) -> Self {
-        Self { classfile }
+        Self { classfile, state: ClassFileCheckerState::default() }
     }
 
-    pub fn check(&self) -> CheckResult<()> {
+    pub fn check(&mut self) -> CheckResult<()> {
         self.check_cfver()?;
-        let is_module = self.check_class_accflags()?;
+        self.check_class_accflags()?;
         self.check_this_class()?;
         self.check_super_class()?;
         self.check_interfaces()?;
+        self.check_fields()?;
 
         todo!()
     }
@@ -64,7 +66,7 @@ impl ClassFileChecker {
         Ok(())
     }
 
-    fn check_class_accflags(&self) -> CheckResult<bool> {
+    fn check_class_accflags(&mut self) -> CheckResult<()> {
         if self
             .classfile
             .access_flags
@@ -78,7 +80,7 @@ impl ClassFileChecker {
                 return Err(CheckError::UnsupportedModuleFlagForVersion);
             }
 
-            return Ok(true);
+            return Ok(());
         }
 
         if self
@@ -168,10 +170,16 @@ impl ClassFileChecker {
     }
 
     fn check_interfaces(&self) -> CheckResult<()> {
-        assert_eq!(self.classfile.interfaces_count as usize, self.classfile.interfaces.len());
+        assert_eq!(
+            self.classfile.interfaces_count as usize,
+            self.classfile.interfaces.len()
+        );
 
         if self.classfile.interfaces.iter().any(|interface_index| {
-            let cp_info_opt = self.classfile.constant_pool.get((interface_index - 1) as usize);
+            let cp_info_opt = self
+                .classfile
+                .constant_pool
+                .get((interface_index - 1) as usize);
 
             if cp_info_opt.is_none() {
                 return true;
@@ -187,5 +195,15 @@ impl ClassFileChecker {
         }
 
         Ok(())
+    }
+}
+
+struct ClassFileCheckerState {
+    is_module: bool,
+}
+
+impl Default for ClassFileCheckerState {
+    fn default() -> Self {
+        Self { is_module: false }
     }
 }
