@@ -42,6 +42,7 @@ impl ClassFileChecker {
         let is_module = self.check_class_accflags()?;
         self.check_this_class()?;
         self.check_super_class()?;
+        self.check_interfaces()?;
 
         todo!()
     }
