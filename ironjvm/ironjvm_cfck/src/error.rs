@@ -27,6 +27,7 @@ pub enum CheckError {
     InvalidFlagsWithInterfaceFlag,
     InvalidMinor { minor: u16 },
     NotOnlyModuleFlagSet,
+    SuperClassIndexNotConstantClass,
     ThisClassIndexNotConstantClass,
     UnsupportedMajor { major: u16 },
     UnsupportedModuleFlagForVersion,

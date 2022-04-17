@@ -41,6 +41,7 @@ impl ClassFileChecker {
         self.check_cfver()?;
         let is_module = self.check_class_accflags()?;
         self.check_this_class()?;
+        self.check_super_class()?;
 
         todo!()
     }
@@ -144,6 +145,45 @@ impl ClassFileChecker {
         let CpInfoType::ConstantClass { .. } = cp_info.info else {
             return Err(CheckError::ThisClassIndexNotConstantClass);
         };
+
+        Ok(())
+    }
+
+    fn check_super_class(&self) -> CheckResult<()> {
+        if self.classfile.super_class == 0 {
+            // FIXME: verify that this class actually represents java/lang/Object
+            return Ok(());
+        }
+
+        let Some(cp_info) = self.classfile.constant_pool.get((self.classfile.super_class - 1) as usize) else {
+            return Err(CheckError::InvalidConstantPoolIndex);
+        };
+
+        let CpInfoType::ConstantClass { .. } = cp_info.info else {
+            return Err(CheckError::SuperClassIndexNotConstantClass);
+        };
+
+        Ok(())
+    }
+
+    fn check_interfaces(&self) -> CheckResult<()> {
+        assert_eq!(self.classfile.interfaces_count as usize, self.classfile.interfaces.len());
+
+        if self.classfile.interfaces.iter().any(|interface_index| {
+            let cp_info_opt = self.classfile.constant_pool.get(interface_index - 1);
+
+            if cp_info_opt.is_none() {
+                return true;
+            }
+
+            let CpInfoType::ConstantClass { .. } = cp_info_opt.unwrap().info else {
+                return true;
+            };
+
+            false
+        }) {
+            return Err(CheckError::InvalidConstantPoolIndex);
+        }
 
         Ok(())
     }
