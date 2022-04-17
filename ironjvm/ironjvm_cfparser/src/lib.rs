@@ -314,7 +314,7 @@ impl ClassFileParser {
             let Some(name_cp_info) = &constant_pool.get(attribute_name_index as usize - 1) else {
                 return Err(ParseError::InvalidConstantPoolIndex);
             };
-            let CpInfoType::ConstantUtf8 { bytes, .. } = name_cp_info else {
+            let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
                 unreachable!()
             };
 

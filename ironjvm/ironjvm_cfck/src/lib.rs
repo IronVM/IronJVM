@@ -171,7 +171,7 @@ impl ClassFileChecker {
         assert_eq!(self.classfile.interfaces_count as usize, self.classfile.interfaces.len());
 
         if self.classfile.interfaces.iter().any(|interface_index| {
-            let cp_info_opt = self.classfile.constant_pool.get(interface_index - 1);
+            let cp_info_opt = self.classfile.constant_pool.get((interface_index - 1) as usize);
 
             if cp_info_opt.is_none() {
                 return true;
