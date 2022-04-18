@@ -83,6 +83,8 @@ impl ClassFileChecker {
                 return Err(CheckError::UnsupportedModuleFlagForVersion);
             }
 
+            self.state.is_module = true;
+
             return Ok(());
         }
 
