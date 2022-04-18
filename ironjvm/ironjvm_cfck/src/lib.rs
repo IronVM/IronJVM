@@ -137,7 +137,7 @@ impl ClassFileChecker {
             return Err(CheckError::AnnotationFlagWithoutInterfaceFlag);
         }
 
-        Ok(false)
+        Ok(())
     }
 
     fn check_this_class(&self) -> CheckResult<()> {
@@ -195,6 +195,10 @@ impl ClassFileChecker {
         }
 
         Ok(())
+    }
+
+    fn check_fields(&self) -> CheckResult<()> {
+        todo!()
     }
 }
 
