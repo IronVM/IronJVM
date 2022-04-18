@@ -35,7 +35,10 @@ pub struct ClassFileChecker {
 
 impl ClassFileChecker {
     pub fn new(classfile: ClassFile) -> Self {
-        Self { classfile, state: ClassFileCheckerState::default() }
+        Self {
+            classfile,
+            state: ClassFileCheckerState::default(),
+        }
     }
 
     pub fn check(&mut self) -> CheckResult<()> {
