@@ -207,9 +207,19 @@ impl ClassFileChecker {
     fn check_fields(&self) -> CheckResult<()> {
         if self.state.is_interface {
             if self.classfile.fields.iter().any(|field| {
-                !field.access_flags.flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_STATIC | FieldAccessFlags::ACC_FINAL) ||
-                    field.access_flags != FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_STATIC | FieldAccessFlags::ACC_FINAL ||
-                    field.access_flags != FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_STATIC | FieldAccessFlags::ACC_FINAL | FieldAccessFlags::ACC_SYNTHETIC
+                !field.access_flags.flag_set(
+                    FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_STATIC
+                        | FieldAccessFlags::ACC_FINAL,
+                ) || field.access_flags
+                    != FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_STATIC
+                        | FieldAccessFlags::ACC_FINAL
+                    || field.access_flags
+                        != FieldAccessFlags::ACC_PUBLIC
+                            | FieldAccessFlags::ACC_STATIC
+                            | FieldAccessFlags::ACC_FINAL
+                            | FieldAccessFlags::ACC_SYNTHETIC
             }) {
                 return Err(CheckError::InvalidInterfaceFieldFlags);
             }
