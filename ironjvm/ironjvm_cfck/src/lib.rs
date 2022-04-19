@@ -210,12 +210,12 @@ impl ClassFileChecker {
 }
 
 struct ClassFileCheckerState {
-    is_module: bool,
     is_interface: bool,
+    is_module: bool,
 }
 
 impl Default for ClassFileCheckerState {
     fn default() -> Self {
-        Self { is_module: false }
+        Self {  is_interface: false, is_module: false }
     }
 }
