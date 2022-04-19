@@ -25,6 +25,7 @@ pub enum CheckError {
     InterfaceFlagWithoutAbstractFlag,
     InvalidConstantPoolIndex,
     InvalidFlagsWithInterfaceFlag,
+    InvalidInterfaceFieldFlags,
     InvalidMinor { minor: u16 },
     NotOnlyModuleFlagSet,
     SuperClassIndexNotConstantClass,
