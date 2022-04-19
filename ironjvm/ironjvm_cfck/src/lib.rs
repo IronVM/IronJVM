@@ -120,6 +120,8 @@ impl ClassFileChecker {
             {
                 return Err(CheckError::InvalidFlagsWithInterfaceFlag);
             }
+
+            self.state.is_interface = true;
         }
 
         if self
@@ -209,6 +211,7 @@ impl ClassFileChecker {
 
 struct ClassFileCheckerState {
     is_module: bool,
+    is_interface: bool,
 }
 
 impl Default for ClassFileCheckerState {
