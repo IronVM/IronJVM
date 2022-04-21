@@ -223,9 +223,30 @@ impl ClassFileChecker {
             }) {
                 return Err(CheckError::InvalidInterfaceFieldFlags);
             }
+        } else {
+            if self.classfile.fields.iter().any(|field| {
+                field.access_flags.flag_set(
+                    FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_PRIVATE
+                        | FieldAccessFlags::ACC_PROTECTED,
+                ) || field
+                    .access_flags
+                    .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PRIVATE)
+                    || field
+                        .access_flags
+                        .flag_set(FieldAccessFlags::ACC_PRIVATE | FieldAccessFlags::ACC_PROTECTED)
+                    || field
+                        .access_flags
+                        .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PROTECTED)
+                    || field
+                        .access_flags
+                        .flag_set(FieldAccessFlags::ACC_FINAL | FieldAccessFlags::ACC_VOLATILE)
+            }) {
+                return Err(CheckError::InvalidFieldFlags);
+            }
         }
 
-        todo!()
+        Ok(())
     }
 }
 

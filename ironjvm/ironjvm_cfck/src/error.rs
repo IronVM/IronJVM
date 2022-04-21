@@ -24,6 +24,7 @@ pub enum CheckError {
     FinalAbstractFlagsSetSimultaneously,
     InterfaceFlagWithoutAbstractFlag,
     InvalidConstantPoolIndex,
+    InvalidFieldFlags,
     InvalidFlagsWithInterfaceFlag,
     InvalidInterfaceFieldFlags,
     InvalidMinor { minor: u16 },
