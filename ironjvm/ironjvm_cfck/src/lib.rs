@@ -252,7 +252,7 @@ impl ClassFileChecker {
                 .constant_pool
                 .get((cp_index - 1) as usize)
                 .filter(|some| {
-                    let &&CpInfoType::ConstantUtf8 { .. } = some else {
+                    let CpInfoType::ConstantUtf8 { .. } = some.info else {
                     return false;
                 };
 
