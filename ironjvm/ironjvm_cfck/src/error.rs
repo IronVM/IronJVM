@@ -21,6 +21,7 @@
 #[derive(Debug)]
 pub enum CheckError {
     AnnotationFlagWithoutInterfaceFlag,
+    FieldNameIndexNotConstantUtf8,
     FinalAbstractFlagsSetSimultaneously,
     InterfaceFlagWithoutAbstractFlag,
     InvalidConstantPoolIndex,

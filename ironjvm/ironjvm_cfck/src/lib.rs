@@ -246,6 +246,23 @@ impl ClassFileChecker {
             }
         }
 
+        if self.classfile.fields.iter().any(|field| {
+            let cp_index = field.name_index;
+            self.classfile
+                .constant_pool
+                .get((cp_index - 1) as usize)
+                .filter(|some| {
+                    let &&CpInfoType::ConstantUtf8 { .. } = some else {
+                    return false;
+                };
+
+                    true
+                })
+                .is_none()
+        }) {
+            return Err(CheckError::FieldNameIndexNotConstantUtf8);
+        }
+
         Ok(())
     }
 }
