@@ -28,13 +28,13 @@ use crate::error::{CheckError, CheckResult};
 
 mod error;
 
-pub struct ClassFileChecker {
-    classfile: ClassFile,
+pub struct ClassFileChecker<'clazz> {
+    classfile: ClassFile<'clazz>,
     state: ClassFileCheckerState,
 }
 
-impl ClassFileChecker {
-    pub fn new(classfile: ClassFile) -> Self {
+impl<'clazz> ClassFileChecker<'clazz> {
+    pub fn new(classfile: ClassFile<'clazz>) -> Self {
         Self {
             classfile,
             state: ClassFileCheckerState::default(),
@@ -263,39 +263,26 @@ impl ClassFileChecker {
             return Err(CheckError::FieldNameIndexNotConstantUtf8);
         }
 
-        if self.classfile.fields.iter().any(|field| {
-            let descriptor_index = field.descriptor_index;
-            let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.classfile
-                .constant_pool
-                .get((descriptor_index - 1) as usize)
-                .filter(|some| {
-                    let CpInfoType::ConstantUtf8 { .. } = some.info else {
-                        return false;
-                    };
-
-                    true
-                })
-                .map(|cp_info| cp_info.info) else {
-                return false;
-            };
-
-            let string = unsafe { String::from_utf8_unchecked(bytes.clone()) };
-
-            match &*string {
-                "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" => true,
-                str if str.starts_with("[") => {
-                    todo!()
-                }
-                str if str.starts_with("L") => {
-                    if !str.ends_with(";") {
-                        return false;
-                    }
-                }
-                _ => false,
-            }
-
-            todo!()
-        }) {}
+        // if self.classfile.fields.iter().any(|field| {
+        //     let descriptor_index = field.descriptor_index;
+        //     let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.classfile
+        //         .constant_pool
+        //         .get((descriptor_index - 1) as usize)
+        //         .filter(|some| {
+        //             let CpInfoType::ConstantUtf8 { .. } = some.info else {
+        //                 return false;
+        //             };
+        //
+        //             true
+        //         })
+        //         .map(|cp_info| cp_info.info) else {
+        //         return false;
+        //     };
+        //
+        //     let _ = unsafe { String::from_utf8_unchecked(bytes.clone()) };
+        //
+        //     todo!()
+        // }) {}
 
         Ok(())
     }

@@ -19,26 +19,26 @@
  */
 
 #[derive(Debug)]
-pub struct ModuleExport {
+pub struct ModuleExport<'clazz> {
     pub exports_index: u16,
     pub exports_flags: u16,
     pub exports_to_count: u16,
-    pub exports_to_index: Vec<u16>,
+    pub exports_to_index: &'clazz [u16],
 }
 
 #[derive(Debug)]
-pub struct ModuleOpen {
+pub struct ModuleOpen<'clazz> {
     pub opens_index: u16,
     pub opens_flags: u16,
     pub opens_to_count: u16,
-    pub opens_to_index: Vec<u16>,
+    pub opens_to_index: &'clazz [u16],
 }
 
 #[derive(Debug)]
-pub struct ModuleProvide {
+pub struct ModuleProvide<'clazz> {
     pub provides_index: u16,
     pub provides_with_count: u16,
-    pub provides_with_index: Vec<u16>,
+    pub provides_with_index: &'clazz [u16],
 }
 
 #[derive(Debug)]

@@ -35,7 +35,7 @@ pub mod rvtnritaattr;
 pub mod smtattr;
 
 #[derive(Debug)]
-pub enum AttributeInfoType {
+pub enum AttributeInfoType<'clazz> {
     ConstantValueAttribute {
         constantvalue_index: u16,
     },
@@ -43,11 +43,11 @@ pub enum AttributeInfoType {
         max_stack: u16,
         max_locals: u16,
         code_length: u32,
-        code: Vec<u8>,
+        code: &'clazz [u8],
         exception_table_length: u16,
         exception_table: Vec<cattr::CodeAttributeExceptionTableEntry>,
         attributes_count: u16,
-        attributes: Vec<AttributeInfo>,
+        attributes: Vec<AttributeInfo<'clazz>>,
     },
     StackMapTableAttribute {
         number_of_entries: u16,
@@ -55,7 +55,7 @@ pub enum AttributeInfoType {
     },
     ExceptionsAttribute {
         number_of_exceptions: u16,
-        exception_index_table: Vec<u16>,
+        exception_index_table: &'clazz [u16],
     },
     InnerClassesAttribute {
         number_of_classes: u16,
@@ -73,7 +73,7 @@ pub enum AttributeInfoType {
         sourcefile_index: u16,
     },
     SourceDebugExtensionAttribute {
-        debug_extension: Vec<u8>,
+        debug_extension: &'clazz [u8],
     },
     LineNumberTableAttribute {
         line_number_table_length: u16,
@@ -117,7 +117,7 @@ pub enum AttributeInfoType {
     },
     BootstrapMethodsAttribute {
         num_bootstrap_methods: u16,
-        bootstrap_methods: Vec<bmattr::BootstrapMethod>,
+        bootstrap_methods: Vec<bmattr::BootstrapMethod<'clazz>>,
     },
     MethodParametersAttribute {
         parameters_count: u8,
@@ -130,17 +130,17 @@ pub enum AttributeInfoType {
         requires_count: u16,
         requires: Vec<mattr::ModuleRequire>,
         exports_count: u16,
-        exports: Vec<mattr::ModuleExport>,
+        exports: Vec<mattr::ModuleExport<'clazz>>,
         opens_count: u16,
-        opens: Vec<mattr::ModuleOpen>,
+        opens: Vec<mattr::ModuleOpen<'clazz>>,
         uses_count: u16,
-        uses_index: Vec<u16>,
+        uses_index: &'clazz [u16],
         provides_count: u16,
-        provides: Vec<mattr::ModuleProvide>,
+        provides: Vec<mattr::ModuleProvide<'clazz>>,
     },
     ModulePackagesAttribute {
         package_count: u16,
-        package_index: Vec<u16>,
+        package_index: &'clazz [u16],
     },
     ModuleMainClassAttribute {
         main_class_index: u16,
@@ -150,14 +150,14 @@ pub enum AttributeInfoType {
     },
     NestMembersAttribute {
         number_of_classes: u16,
-        classes: Vec<u16>,
+        classes: &'clazz [u16],
     },
     RecordAttribute {
         components_count: u16,
-        components: Vec<rattr::RecordComponentInfo>,
+        components: Vec<rattr::RecordComponentInfo<'clazz>>,
     },
     PermittedSubclassesAttribute {
         number_of_classes: u16,
-        classes: Vec<u16>,
+        classes: &'clazz [u16],
     },
 }

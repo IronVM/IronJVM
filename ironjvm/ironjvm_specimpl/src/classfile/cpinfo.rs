@@ -20,10 +20,10 @@
 
 #[derive(Debug)]
 #[repr(u8)]
-pub enum CpInfoType {
+pub enum CpInfoType<'clazz> {
     ConstantUtf8 {
         length: u16,
-        bytes: Vec<u8>,
+        bytes: &'clazz [u8],
     } = 1,
     ConstantInteger {
         bytes: u32,

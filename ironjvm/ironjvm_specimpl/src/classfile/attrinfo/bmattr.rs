@@ -19,8 +19,8 @@
  */
 
 #[derive(Debug)]
-pub struct BootstrapMethod {
+pub struct BootstrapMethod<'clazz> {
     pub bootstrap_method_ref: u16,
     pub num_bootstrap_arguments: u16,
-    pub bootstrap_arguments: Vec<u16>,
+    pub bootstrap_arguments: &'clazz [u16],
 }

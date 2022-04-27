@@ -21,9 +21,9 @@
 use crate::classfile;
 
 #[derive(Debug)]
-pub struct RecordComponentInfo {
+pub struct RecordComponentInfo<'clazz> {
     pub name_index: u16,
     pub descriptor_index: u16,
     pub attributes_count: u16,
-    pub attributes: Vec<classfile::AttributeInfo>,
+    pub attributes: Vec<classfile::AttributeInfo<'clazz>>,
 }
