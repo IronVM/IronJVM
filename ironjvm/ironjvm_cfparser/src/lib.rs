@@ -20,7 +20,8 @@
 
 #![feature(let_else)]
 
-use std::slice;
+use byteorder::{BigEndian, ByteOrder};
+
 use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
@@ -56,7 +57,10 @@ pub struct ClassFileParser<'clazz> {
 
 impl<'clazz> ClassFileParser<'clazz> {
     pub fn new(classfile: &'clazz [u8]) -> Self {
-        Self { classfile, byte_index: 0 }
+        Self {
+            classfile,
+            byte_index: 0,
+        }
     }
 
     pub fn parse(&mut self) -> ParseResult<ClassFile<'clazz>> {
@@ -112,19 +116,31 @@ impl<'clazz> ClassFileParser<'clazz> {
     }
 
     fn next_u2(&mut self) -> u16 {
-        let ret = u16::from_be_bytes(self.classfile[self.byte_index..self.byte_index + 2].try_into().unwrap());
+        let ret = u16::from_be_bytes(
+            self.classfile[self.byte_index..self.byte_index + 2]
+                .try_into()
+                .unwrap(),
+        );
         self.byte_index += 2;
 
         ret
     }
 
-    fn next_u2_many(&mut self, _: usize) -> &'clazz [u16] {
-        // FIXME: fix this
-        &[]
+    fn next_u2_many(&mut self, length: usize) -> &'clazz [u16] {
+        let mut output = vec![0; length];
+        let bytes = self.next_u1_many(length * 2);
+
+        BigEndian::read_u16_into(bytes, output.as_mut_slice());
+        let ptr = output.as_ptr();
+        unsafe { std::slice::from_raw_parts(ptr, length) }
     }
 
     fn next_u4(&mut self) -> u32 {
-        let ret = u32::from_be_bytes(self.classfile[self.byte_index..self.byte_index + 4].try_into().unwrap());
+        let ret = u32::from_be_bytes(
+            self.classfile[self.byte_index..self.byte_index + 4]
+                .try_into()
+                .unwrap(),
+        );
         self.byte_index += 4;
 
         ret
@@ -583,7 +599,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                     for _ in 0..num_bootstrap_methods {
                         let bootstrap_method_ref = self.next_u2();
                         let num_bootstrap_arguments = self.next_u2();
-                        let bootstrap_arguments = self.next_u2_many(num_bootstrap_arguments as usize);
+                        let bootstrap_arguments =
+                            self.next_u2_many(num_bootstrap_arguments as usize);
 
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref,

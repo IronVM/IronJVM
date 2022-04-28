@@ -9,7 +9,7 @@ license = "GPL-2.0"
 [dependencies]
 ironjvm_specimpl = { path = "../ironjvm_specimpl" }
 
-bytemuck = "1.9.1"
+byteorder = "1.4.3"
 
 [dev-dependencies]
 criterion = "0.3.5"

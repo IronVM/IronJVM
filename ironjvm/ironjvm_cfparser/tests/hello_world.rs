@@ -1,12 +1,12 @@
 extern crate core;
 
-
 use ironjvm_cfparser::ClassFileParser;
 
 #[test]
 fn hello_world() {
     let bytes =
-        std::fs::read("../test_classes/com/github/htgazurex1212/ironjvm/tests/HelloWorld.class").unwrap();
+        std::fs::read("../test_classes/com/github/htgazurex1212/ironjvm/tests/HelloWorld.class")
+            .unwrap();
 
     let mut parser = ClassFileParser::new(bytes.as_slice());
     let result = parser.parse();
