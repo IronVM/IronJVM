@@ -122,7 +122,6 @@ impl<'clazz> ClassFileParser<'clazz> {
         u16::from_be_bytes(self.next_u1_many(2).try_into().unwrap())
     }
 
-    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u2_many(&mut self, length: usize) -> &'clazz [u16] {
         let mut output = vec![0; length];
         let bytes = self.next_u1_many(length * 2);
