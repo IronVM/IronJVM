@@ -1,5 +1,3 @@
-extern crate core;
-
 use ironjvm_cfparser::ClassFileParser;
 
 #[test]
