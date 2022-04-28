@@ -101,6 +101,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         })
     }
 
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u1(&mut self) -> u8 {
         let ret = self.classfile[self.byte_index];
         self.byte_index += 1;
@@ -108,6 +109,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         ret
     }
 
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u1_many(&mut self, len: usize) -> &'clazz [u8] {
         let output = &self.classfile[self.byte_index..self.byte_index + len];
         self.byte_index += len;
@@ -115,17 +117,12 @@ impl<'clazz> ClassFileParser<'clazz> {
         output
     }
 
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u2(&mut self) -> u16 {
-        let ret = u16::from_be_bytes(
-            self.classfile[self.byte_index..self.byte_index + 2]
-                .try_into()
-                .unwrap(),
-        );
-        self.byte_index += 2;
-
-        ret
+        u16::from_be_bytes(self.next_u1_many(2).try_into().unwrap())
     }
 
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u2_many(&mut self, length: usize) -> &'clazz [u16] {
         let mut output = vec![0; length];
         let bytes = self.next_u1_many(length * 2);
@@ -135,15 +132,9 @@ impl<'clazz> ClassFileParser<'clazz> {
         unsafe { std::slice::from_raw_parts(ptr, length) }
     }
 
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u4(&mut self) -> u32 {
-        let ret = u32::from_be_bytes(
-            self.classfile[self.byte_index..self.byte_index + 4]
-                .try_into()
-                .unwrap(),
-        );
-        self.byte_index += 4;
-
-        ret
+        u32::from_be_bytes(self.next_u1_many(4).try_into().unwrap())
     }
 
     fn parse_magic(&mut self) -> ParseResult<u32> {
