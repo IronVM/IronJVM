@@ -7,7 +7,7 @@ fn intentional_large(criterion: &mut Criterion) {
             let file = std::fs::read(
                 "../test_classes/com/github/htgazurex1212/ironjvm/tests/Benchmark.class",
             )
-                .unwrap();
+            .unwrap();
 
             let mut parser = black_box(ClassFileParser::new(black_box(&file)));
             black_box(parser.parse().unwrap());
