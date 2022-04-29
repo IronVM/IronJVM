@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use ironjvm_cfparser::ClassFileParser;
 
 fn basic_parse(criterion: &mut Criterion) {
@@ -9,8 +9,8 @@ fn basic_parse(criterion: &mut Criterion) {
             )
             .unwrap();
 
-            let mut parser = black_box(ClassFileParser::new(black_box(&file)));
-            black_box(parser.parse().unwrap());
+            let mut parser = ClassFileParser::new(&file);
+            parser.parse().unwrap();
         })
     });
 }

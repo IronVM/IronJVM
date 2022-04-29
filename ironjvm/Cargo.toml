@@ -6,5 +6,5 @@ members = [
     "ironjvm_specimpl",
 ]
 
-[profile.bench]
+[profile.release]
 debug = true
