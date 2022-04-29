@@ -5,3 +5,6 @@ members = [
     "ironjvm_libjvm",
     "ironjvm_specimpl",
 ]
+
+[profile.bench]
+debug = true
