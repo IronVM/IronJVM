@@ -20,7 +20,9 @@
 
 #![feature(let_else)]
 
+#[cfg(not(target_endian = "big"))]
 use byteorder::{BigEndian, ByteOrder};
+use std::borrow::Cow;
 
 use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
@@ -122,13 +124,21 @@ impl<'clazz> ClassFileParser<'clazz> {
         u16::from_be_bytes(self.next_u1_many(2).try_into().unwrap())
     }
 
-    fn next_u2_many(&mut self, length: usize) -> &'clazz [u16] {
-        let mut output = vec![0; length];
+    fn next_u2_many(&mut self, length: usize) -> Cow<'clazz, [u16]> {
         let bytes = self.next_u1_many(length * 2);
 
-        BigEndian::read_u16_into(bytes, output.as_mut_slice());
-        let ptr = output.as_ptr();
-        unsafe { std::slice::from_raw_parts(ptr, length) }
+        #[cfg(target_endian = "big")]
+        {
+            Cow::Borrowed(bytemuck::cast_slice(bytes))
+        }
+
+        #[cfg(not(target_endian = "big"))]
+        {
+            let mut output = vec![0; length];
+            BigEndian::read_u16_into(bytes, output.as_mut_slice());
+
+            Cow::Owned(output)
+        }
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
@@ -284,7 +294,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         Ok(pool)
     }
 
-    fn parse_interfaces(&mut self, count: u16) -> &'clazz [u16] {
+    fn parse_interfaces(&mut self, count: u16) -> Cow<'clazz, [u16]> {
         self.next_u2_many(count as usize)
     }
 

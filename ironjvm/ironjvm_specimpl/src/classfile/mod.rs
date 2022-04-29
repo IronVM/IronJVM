@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use std::borrow::Cow;
+
 pub mod attrinfo;
 pub mod cpinfo;
 pub mod flags;
@@ -40,7 +42,7 @@ pub struct ClassFile<'clazz> {
     pub this_class: u16,
     pub super_class: u16,
     pub interfaces_count: u16,
-    pub interfaces: &'clazz [u16],
+    pub interfaces: Cow<'clazz, [u16]>,
     pub fields_count: u16,
     pub fields: Vec<FieldInfo<'clazz>>,
     pub methods_count: u16,

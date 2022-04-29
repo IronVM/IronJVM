@@ -11,6 +11,9 @@ ironjvm_specimpl = { path = "../ironjvm_specimpl" }
 
 byteorder = "1.4.3"
 
+[target.'cfg(target_endian = "big")'.dependencies]
+bytemuck = "1.9.1"
+
 [dev-dependencies]
 criterion = "0.3.5"
 expect-test = "1.2.2"

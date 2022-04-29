@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use std::borrow::Cow;
+
 use crate::classfile::AttributeInfo;
 
 pub mod bmattr;
@@ -55,7 +57,7 @@ pub enum AttributeInfoType<'clazz> {
     },
     ExceptionsAttribute {
         number_of_exceptions: u16,
-        exception_index_table: &'clazz [u16],
+        exception_index_table: Cow<'clazz, [u16]>,
     },
     InnerClassesAttribute {
         number_of_classes: u16,
@@ -134,13 +136,13 @@ pub enum AttributeInfoType<'clazz> {
         opens_count: u16,
         opens: Vec<mattr::ModuleOpen<'clazz>>,
         uses_count: u16,
-        uses_index: &'clazz [u16],
+        uses_index: Cow<'clazz, [u16]>,
         provides_count: u16,
         provides: Vec<mattr::ModuleProvide<'clazz>>,
     },
     ModulePackagesAttribute {
         package_count: u16,
-        package_index: &'clazz [u16],
+        package_index: Cow<'clazz, [u16]>,
     },
     ModuleMainClassAttribute {
         main_class_index: u16,
@@ -150,7 +152,7 @@ pub enum AttributeInfoType<'clazz> {
     },
     NestMembersAttribute {
         number_of_classes: u16,
-        classes: &'clazz [u16],
+        classes: Cow<'clazz, [u16]>,
     },
     RecordAttribute {
         components_count: u16,
@@ -158,6 +160,6 @@ pub enum AttributeInfoType<'clazz> {
     },
     PermittedSubclassesAttribute {
         number_of_classes: u16,
-        classes: &'clazz [u16],
+        classes: Cow<'clazz, [u16]>,
     },
 }
