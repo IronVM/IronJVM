@@ -21,3 +21,7 @@ expect-test = "1.2.2"
 [[bench]]
 name = "basic_parse"
 harness = false
+
+[[bench]]
+name = "intentional_large"
+harness = false
