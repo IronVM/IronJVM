@@ -20,8 +20,8 @@
 
 #[derive(Debug)]
 pub struct Annotation {
-    pub type_index: u16,
-    pub num_element_value_pairs: u16,
+    pub type_index: [u8; 2],
+    pub num_element_value_pairs: [u8; 2],
     pub element_value_pairs: Vec<ElementValuePair>,
 }
 
@@ -34,26 +34,26 @@ pub struct ElementValue {
 #[derive(Debug)]
 pub enum ElementValueValue {
     ConstValueIndex {
-        const_value_index: u16,
+        const_value_index: [u8; 2],
     },
     EnumConstValue {
-        type_name_index: u16,
-        const_name_index: u16,
+        type_name_index: [u8; 2],
+        const_name_index: [u8; 2],
     },
     ClassInfoIndex {
-        class_info_index: u16,
+        class_info_index: [u8; 2],
     },
     AnnotationValue {
         annotation_value: Annotation,
     },
     ArrayValue {
-        num_values: u16,
+        num_values: [u8; 2],
         values: Vec<ElementValue>,
     },
 }
 
 #[derive(Debug)]
 pub struct ElementValuePair {
-    pub element_name_index: u16,
+    pub element_name_index: [u8; 2],
     pub value: ElementValue,
 }

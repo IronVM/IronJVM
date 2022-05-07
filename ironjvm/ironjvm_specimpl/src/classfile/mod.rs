@@ -18,15 +18,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::borrow::Cow;
-
 pub mod attrinfo;
 pub mod cpinfo;
 pub mod flags;
 
 #[derive(Debug)]
 pub struct AttributeInfo<'clazz> {
-    pub attribute_name_index: u16,
+    pub attribute_name_index: [u8; 2],
     pub attribute_length: u32,
     pub info: attrinfo::AttributeInfoType<'clazz>,
 }
@@ -34,20 +32,20 @@ pub struct AttributeInfo<'clazz> {
 #[derive(Debug)]
 pub struct ClassFile<'clazz> {
     pub magic: u32,
-    pub minor_version: u16,
-    pub major_version: u16,
-    pub constant_pool_count: u16,
+    pub minor_version: [u8; 2],
+    pub major_version: [u8; 2],
+    pub constant_pool_count: [u8; 2],
     pub constant_pool: Vec<CpInfo<'clazz>>,
-    pub access_flags: u16,
-    pub this_class: u16,
-    pub super_class: u16,
-    pub interfaces_count: u16,
-    pub interfaces: Cow<'clazz, [u16]>,
-    pub fields_count: u16,
+    pub access_flags: [u8; 2],
+    pub this_class: [u8; 2],
+    pub super_class: [u8; 2],
+    pub interfaces_count: [u8; 2],
+    pub interfaces: &'clazz [[u8; 2]],
+    pub fields_count: [u8; 2],
     pub fields: Vec<FieldInfo<'clazz>>,
-    pub methods_count: u16,
+    pub methods_count: [u8; 2],
     pub methods: Vec<MethodInfo<'clazz>>,
-    pub attributes_count: u16,
+    pub attributes_count: [u8; 2],
     pub attributes: Vec<AttributeInfo<'clazz>>,
 }
 
@@ -59,18 +57,18 @@ pub struct CpInfo<'clazz> {
 
 #[derive(Debug)]
 pub struct FieldInfo<'clazz> {
-    pub access_flags: u16,
-    pub name_index: u16,
-    pub descriptor_index: u16,
-    pub attributes_count: u16,
+    pub access_flags: [u8; 2],
+    pub name_index: [u8; 2],
+    pub descriptor_index: [u8; 2],
+    pub attributes_count: [u8; 2],
     pub attributes: Vec<AttributeInfo<'clazz>>,
 }
 
 #[derive(Debug)]
 pub struct MethodInfo<'clazz> {
-    pub access_flags: u16,
-    pub name_index: u16,
-    pub descriptor_index: u16,
-    pub attributes_count: u16,
+    pub access_flags: [u8; 2],
+    pub name_index: [u8; 2],
+    pub descriptor_index: [u8; 2],
+    pub attributes_count: [u8; 2],
     pub attributes: Vec<AttributeInfo<'clazz>>,
 }

@@ -20,6 +20,6 @@
 
 #[derive(Debug)]
 pub struct LineNumber {
-    pub start_pc: u16,
-    pub line_number: u16,
+    pub start_pc: [u8; 2],
+    pub line_number: [u8; 2],
 }

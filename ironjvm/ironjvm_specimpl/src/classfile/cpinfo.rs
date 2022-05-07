@@ -22,7 +22,7 @@
 #[repr(u8)]
 pub enum CpInfoType<'clazz> {
     ConstantUtf8 {
-        length: u16,
+        length: [u8; 2],
         bytes: &'clazz [u8],
     } = 1,
     ConstantInteger {
@@ -40,46 +40,46 @@ pub enum CpInfoType<'clazz> {
         low_bytes: u32,
     } = 6,
     ConstantClass {
-        name_index: u16,
+        name_index: [u8; 2],
     } = 7,
     ConstantString {
-        string_index: u16,
+        string_index: [u8; 2],
     } = 8,
     ConstantFieldRef {
-        class_index: u16,
-        name_and_type_index: u16,
+        class_index: [u8; 2],
+        name_and_type_index: [u8; 2],
     } = 9,
     ConstantMethodRef {
-        class_index: u16,
-        name_and_type_index: u16,
+        class_index: [u8; 2],
+        name_and_type_index: [u8; 2],
     } = 10,
     ConstantInterfaceMethodRef {
-        class_index: u16,
-        name_and_type_index: u16,
+        class_index: [u8; 2],
+        name_and_type_index: [u8; 2],
     } = 11,
     ConstantNameAndType {
-        name_index: u16,
-        descriptor_index: u16,
+        name_index: [u8; 2],
+        descriptor_index: [u8; 2],
     } = 12,
     ConstantMethodHandle {
         reference_kind: u8,
-        reference_index: u16,
+        reference_index: [u8; 2],
     } = 15,
     ConstantMethodType {
-        descriptor_index: u16,
+        descriptor_index: [u8; 2],
     } = 16,
     ConstantDynamic {
-        bootstrap_method_attr_index: u16,
-        name_and_type_index: u16,
+        bootstrap_method_attr_index: [u8; 2],
+        name_and_type_index: [u8; 2],
     } = 17,
     ConstantInvokeDynamic {
-        bootstrap_method_attr_index: u16,
-        name_and_type_index: u16,
+        bootstrap_method_attr_index: [u8; 2],
+        name_and_type_index: [u8; 2],
     } = 18,
     ConstantModule {
-        name_index: u16,
+        name_index: [u8; 2],
     } = 19,
     ConstantPackage {
-        name_index: u16,
+        name_index: [u8; 2],
     } = 20,
 }

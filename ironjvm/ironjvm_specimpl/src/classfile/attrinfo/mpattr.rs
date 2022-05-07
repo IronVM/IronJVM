@@ -20,6 +20,6 @@
 
 #[derive(Debug)]
 pub struct MethodParameter {
-    pub name_index: u16,
-    pub access_flags: u16,
+    pub name_index: [u8; 2],
+    pub access_flags: [u8; 2],
 }

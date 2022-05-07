@@ -20,10 +20,6 @@
 
 #![feature(let_else)]
 
-#[cfg(not(target_endian = "big"))]
-use byteorder::{BigEndian, ByteOrder};
-use std::borrow::Cow;
-
 use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
@@ -75,13 +71,13 @@ impl<'clazz> ClassFileParser<'clazz> {
         let this_class = self.next_u2();
         let super_class = self.next_u2();
         let interfaces_count = self.next_u2();
-        let interfaces = self.parse_interfaces(interfaces_count);
+        let interfaces = self.parse_interfaces(self.u8_slice_to_u16(interfaces_count));
         let fields_count = self.next_u2();
-        let fields = self.parse_fields(fields_count, &constant_pool)?;
+        let fields = self.parse_fields(self.u8_slice_to_u16(fields_count), &constant_pool)?;
         let methods_count = self.next_u2();
-        let methods = self.parse_methods(methods_count, &constant_pool)?;
+        let methods = self.parse_methods(self.u8_slice_to_u16(methods_count), &constant_pool)?;
         let attributes_count = self.next_u2();
-        let attributes = self.parse_attributes(attributes_count, &constant_pool)?;
+        let attributes = self.parse_attributes(self.u8_slice_to_u16(attributes_count), &constant_pool)?;
 
         Ok(ClassFile {
             magic,
@@ -120,25 +116,22 @@ impl<'clazz> ClassFileParser<'clazz> {
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
-    fn next_u2(&mut self) -> u16 {
-        u16::from_be_bytes(self.next_u1_many(2).try_into().unwrap())
+    fn next_u2(&mut self) -> [u8; 2] {
+        [self.next_u1(), self.next_u1()]
     }
 
-    fn next_u2_many(&mut self, length: usize) -> Cow<'clazz, [u16]> {
-        let bytes = self.next_u1_many(length * 2);
-
-        #[cfg(target_endian = "big")]
-        {
-            Cow::Borrowed(bytemuck::cast_slice(bytes))
+    // Credit: code referenced from https://github.com/TapVM/Aftermath
+    fn next_u2_many(&mut self, length: usize) -> &'clazz [[u8; 2]] {
+        unsafe {
+            core::slice::from_raw_parts(
+                self.next_u1_many(length * 2).as_ptr().cast(),
+                length,
+            )
         }
+    }
 
-        #[cfg(not(target_endian = "big"))]
-        {
-            let mut output = vec![0; length];
-            BigEndian::read_u16_into(bytes, output.as_mut_slice());
-
-            Cow::Owned(output)
-        }
+    fn u8_slice_to_u16(&self, bytes: [u8; 2]) -> u16 {
+        u16::from_be_bytes(bytes)
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
@@ -156,8 +149,8 @@ impl<'clazz> ClassFileParser<'clazz> {
         Ok(output)
     }
 
-    fn parse_constant_pool(&mut self, count: u16) -> ParseResult<Vec<CpInfo<'clazz>>> {
-        let capacity = (count - 1) as usize;
+    fn parse_constant_pool(&mut self, count: [u8; 2]) -> ParseResult<Vec<CpInfo<'clazz>>> {
+        let capacity = self.u8_slice_to_u16(count) as usize;
         let mut pool = Vec::with_capacity(capacity);
 
         for _ in 0..capacity {
@@ -165,7 +158,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let info = match tag {
                 1 => {
                     let length = self.next_u2();
-                    let bytes = self.next_u1_many(length as usize);
+                    let bytes = self.next_u1_many(self.u8_slice_to_u16(length) as usize);
 
                     CpInfoType::ConstantUtf8 { length, bytes }
                 }
@@ -294,7 +287,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         Ok(pool)
     }
 
-    fn parse_interfaces(&mut self, count: u16) -> Cow<'clazz, [u16]> {
+    fn parse_interfaces(&mut self, count: u16) -> &'clazz [[u8; 2]] {
         self.next_u2_many(count as usize)
     }
 
@@ -310,7 +303,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let name_index = self.next_u2();
             let descriptor_index = self.next_u2();
             let attributes_count = self.next_u2();
-            let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+            let attributes = self.parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?;
 
             vec.push(FieldInfo {
                 access_flags,
@@ -335,7 +328,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let attribute_name_index = self.next_u2();
             let attribute_length = self.next_u4();
 
-            let Some(name_cp_info) = &constant_pool.get(attribute_name_index as usize - 1) else {
+            let Some(name_cp_info) = &constant_pool.get(self.u8_slice_to_u16(attribute_name_index) as usize - 1) else {
                 return Err(ParseError::InvalidConstantPoolIndex);
             };
             let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
@@ -362,10 +355,10 @@ impl<'clazz> ClassFileParser<'clazz> {
                     let code = self.next_u1_many(code_length as usize);
 
                     let exception_table_length = self.next_u2();
-                    let exception_table = self.parse_exception_table(exception_table_length)?;
+                    let exception_table = self.parse_exception_table(self.u8_slice_to_u16(exception_table_length))?;
 
                     let attributes_count = self.next_u2();
-                    let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+                    let attributes = self.parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?;
 
                     AttributeInfoType::CodeAttribute {
                         max_stack,
@@ -380,8 +373,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "StackMapTable" => {
                     let number_of_entries = self.next_u2();
-                    let mut stack_map_table = Vec::with_capacity(number_of_entries as usize);
-                    for _ in 0..number_of_entries {
+                    let mut stack_map_table = Vec::with_capacity(self.u8_slice_to_u16(number_of_entries) as usize);
+                    for _ in 0..self.u8_slice_to_u16(number_of_entries) {
                         stack_map_table.push(self.parse_stack_map_frame()?);
                     }
 
@@ -392,7 +385,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "Exceptions" => {
                     let number_of_exceptions = self.next_u2();
-                    let exception_index_table = self.next_u2_many(number_of_exceptions as usize);
+                    let exception_index_table = self.next_u2_many(self.u8_slice_to_u16(number_of_exceptions) as usize);
 
                     AttributeInfoType::ExceptionsAttribute {
                         number_of_exceptions,
@@ -401,8 +394,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "InnerClasses" => {
                     let number_of_classes = self.next_u2();
-                    let mut classes = Vec::with_capacity(number_of_classes as usize);
-                    for _ in 0..number_of_classes {
+                    let mut classes = Vec::with_capacity(self.u8_slice_to_u16(number_of_classes) as usize);
+                    for _ in 0..self.u8_slice_to_u16(number_of_classes) {
                         let inner_class_info_index = self.next_u2();
                         let outer_class_info_index = self.next_u2();
                         let inner_name_index = self.next_u2();
@@ -449,8 +442,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 "LineNumberTable" => {
                     let line_number_table_length = self.next_u2();
                     let mut line_number_table =
-                        Vec::with_capacity(line_number_table_length as usize);
-                    for _ in 0..line_number_table_length {
+                        Vec::with_capacity(self.u8_slice_to_u16(line_number_table_length) as usize);
+                    for _ in 0..self.u8_slice_to_u16(line_number_table_length) {
                         let start_pc = self.next_u2();
                         let line_number = self.next_u2();
 
@@ -468,8 +461,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 "LocalVariableTable" => {
                     let local_variable_table_length = self.next_u2();
                     let mut local_variable_table =
-                        Vec::with_capacity(local_variable_table_length as usize);
-                    for _ in 0..local_variable_table_length {
+                        Vec::with_capacity(self.u8_slice_to_u16(local_variable_table_length) as usize);
+                    for _ in 0..self.u8_slice_to_u16(local_variable_table_length) {
                         let start_pc = self.next_u2();
                         let length = self.next_u2();
                         let name_index = self.next_u2();
@@ -493,8 +486,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 "LocalVariableTypeTable" => {
                     let local_variable_type_table_length = self.next_u2();
                     let mut local_variable_type_table =
-                        Vec::with_capacity(local_variable_type_table_length as usize);
-                    for _ in 0..local_variable_type_table_length {
+                        Vec::with_capacity(self.u8_slice_to_u16(local_variable_type_table_length) as usize);
+                    for _ in 0..self.u8_slice_to_u16(local_variable_type_table_length) {
                         let start_pc = self.next_u2();
                         let length = self.next_u2();
                         let name_index = self.next_u2();
@@ -518,8 +511,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 "Deprecated" => AttributeInfoType::DeprecatedAttribute,
                 "RuntimeVisibleAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let mut annotations = Vec::with_capacity(num_annotations as usize);
-                    for _ in 0..num_annotations {
+                    let mut annotations = Vec::with_capacity(self.u8_slice_to_u16(num_annotations) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_annotations) {
                         annotations.push(self.parse_annotation()?);
                     }
 
@@ -530,8 +523,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let mut annotations = Vec::with_capacity(num_annotations as usize);
-                    for _ in 0..num_annotations {
+                    let mut annotations = Vec::with_capacity(self.u8_slice_to_u16(num_annotations) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_annotations) {
                         annotations.push(self.parse_annotation()?);
                     }
 
@@ -542,8 +535,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeVisibleParameterAnnotations" => {
                     let num_parameters = self.next_u2();
-                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
-                    for _ in 0..num_parameters {
+                    let mut parameter_annotations = Vec::with_capacity(self.u8_slice_to_u16(num_parameters) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_parameters) {
                         parameter_annotations.push(self.parse_parameter_annotation()?);
                     }
 
@@ -554,8 +547,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleParameterAnnotations" => {
                     let num_parameters = self.next_u2();
-                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
-                    for _ in 0..num_parameters {
+                    let mut parameter_annotations = Vec::with_capacity(self.u8_slice_to_u16(num_parameters) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_parameters) {
                         parameter_annotations.push(self.parse_parameter_annotation()?);
                     }
 
@@ -566,8 +559,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeVisibleTypeAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let mut annotations = Vec::with_capacity(num_annotations as usize);
-                    for _ in 0..num_annotations {
+                    let mut annotations = Vec::with_capacity(self.u8_slice_to_u16(num_annotations) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_annotations) {
                         annotations.push(self.parse_type_annotation()?);
                     }
 
@@ -578,8 +571,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleTypeAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let mut annotations = Vec::with_capacity(num_annotations as usize);
-                    for _ in 0..num_annotations {
+                    let mut annotations = Vec::with_capacity(self.u8_slice_to_u16(num_annotations) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_annotations) {
                         annotations.push(self.parse_type_annotation()?);
                     }
 
@@ -595,12 +588,12 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "BootstrapMethods" => {
                     let num_bootstrap_methods = self.next_u2();
-                    let mut bootstrap_methods = Vec::with_capacity(num_bootstrap_methods as usize);
-                    for _ in 0..num_bootstrap_methods {
+                    let mut bootstrap_methods = Vec::with_capacity(self.u8_slice_to_u16(num_bootstrap_methods) as usize);
+                    for _ in 0..self.u8_slice_to_u16(num_bootstrap_methods) {
                         let bootstrap_method_ref = self.next_u2();
                         let num_bootstrap_arguments = self.next_u2();
                         let bootstrap_arguments =
-                            self.next_u2_many(num_bootstrap_arguments as usize);
+                            self.next_u2_many(self.u8_slice_to_u16(num_bootstrap_arguments) as usize);
 
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref,
@@ -638,8 +631,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                     let module_version_index = self.next_u2();
 
                     let requires_count = self.next_u2();
-                    let mut requires = Vec::with_capacity(requires_count as usize);
-                    for _ in 0..requires_count {
+                    let mut requires = Vec::with_capacity(self.u8_slice_to_u16(requires_count) as usize);
+                    for _ in 0..self.u8_slice_to_u16(requires_count) {
                         let requires_index = self.next_u2();
                         let requires_flags = self.next_u2();
                         let requires_version_index = self.next_u2();
@@ -652,12 +645,12 @@ impl<'clazz> ClassFileParser<'clazz> {
                     }
 
                     let exports_count = self.next_u2();
-                    let mut exports = Vec::with_capacity(exports_count as usize);
-                    for _ in 0..exports_count {
+                    let mut exports = Vec::with_capacity(self.u8_slice_to_u16(exports_count) as usize);
+                    for _ in 0..self.u8_slice_to_u16(exports_count) {
                         let exports_index = self.next_u2();
                         let exports_flags = self.next_u2();
                         let exports_to_count = self.next_u2();
-                        let exports_to_index = self.next_u2_many(exports_to_count as usize);
+                        let exports_to_index = self.next_u2_many(self.u8_slice_to_u16(exports_to_count) as usize);
 
                         exports.push(ModuleExport {
                             exports_index,
@@ -668,12 +661,12 @@ impl<'clazz> ClassFileParser<'clazz> {
                     }
 
                     let opens_count = self.next_u2();
-                    let mut opens = Vec::with_capacity(opens_count as usize);
-                    for _ in 0..exports_count {
+                    let mut opens = Vec::with_capacity(self.u8_slice_to_u16(opens_count) as usize);
+                    for _ in 0..self.u8_slice_to_u16(opens_count) {
                         let opens_index = self.next_u2();
                         let opens_flags = self.next_u2();
                         let opens_to_count = self.next_u2();
-                        let opens_to_index = self.next_u2_many(opens_to_count as usize);
+                        let opens_to_index = self.next_u2_many(self.u8_slice_to_u16(opens_to_count) as usize);
 
                         opens.push(ModuleOpen {
                             opens_index,
@@ -684,14 +677,14 @@ impl<'clazz> ClassFileParser<'clazz> {
                     }
 
                     let uses_count = self.next_u2();
-                    let uses_index = self.next_u2_many(uses_count as usize);
+                    let uses_index = self.next_u2_many(self.u8_slice_to_u16(uses_count) as usize);
 
                     let provides_count = self.next_u2();
-                    let mut provides = Vec::with_capacity(provides_count as usize);
-                    for _ in 0..provides_count {
+                    let mut provides = Vec::with_capacity(self.u8_slice_to_u16(provides_count) as usize);
+                    for _ in 0..self.u8_slice_to_u16(provides_count) {
                         let provides_index = self.next_u2();
                         let provides_with_count = self.next_u2();
-                        let provides_with_index = self.next_u2_many(provides_with_count as usize);
+                        let provides_with_index = self.next_u2_many(self.u8_slice_to_u16(provides_with_count) as usize);
 
                         provides.push(ModuleProvide {
                             provides_index,
@@ -718,7 +711,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "ModulePackages" => {
                     let package_count = self.next_u2();
-                    let package_index = self.next_u2_many(package_count as usize);
+                    let package_index = self.next_u2_many(self.u8_slice_to_u16(package_count) as usize);
 
                     AttributeInfoType::ModulePackagesAttribute {
                         package_count,
@@ -737,7 +730,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "NestMembers" => {
                     let number_of_classes = self.next_u2();
-                    let classes = self.next_u2_many(number_of_classes as usize);
+                    let classes = self.next_u2_many(self.u8_slice_to_u16(number_of_classes) as usize);
 
                     AttributeInfoType::NestMembersAttribute {
                         number_of_classes,
@@ -746,12 +739,12 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "Record" => {
                     let components_count = self.next_u2();
-                    let mut components = Vec::with_capacity(components_count as usize);
-                    for _ in 0..components_count {
+                    let mut components = Vec::with_capacity(self.u8_slice_to_u16(components_count) as usize);
+                    for _ in 0..self.u8_slice_to_u16(components_count) {
                         let name_index = self.next_u2();
                         let descriptor_index = self.next_u2();
                         let attributes_count = self.next_u2();
-                        let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+                        let attributes = self.parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?;
 
                         components.push(RecordComponentInfo {
                             name_index,
@@ -768,7 +761,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "PermittedSubclasses" => {
                     let number_of_classes = self.next_u2();
-                    let classes = self.next_u2_many(number_of_classes as usize);
+                    let classes = self.next_u2_many(self.u8_slice_to_u16(number_of_classes) as usize);
 
                     AttributeInfoType::PermittedSubclassesAttribute {
                         number_of_classes,
@@ -866,14 +859,14 @@ impl<'clazz> ClassFileParser<'clazz> {
                 let offset_delta = self.next_u2();
 
                 let number_of_locals = self.next_u2();
-                let mut locals = Vec::with_capacity(number_of_locals as usize);
-                for _ in 0..number_of_locals {
+                let mut locals = Vec::with_capacity(self.u8_slice_to_u16(number_of_locals) as usize);
+                for _ in 0..self.u8_slice_to_u16(number_of_locals) {
                     locals.push(self.parse_verification_type_info()?);
                 }
 
                 let number_of_stack_items = self.next_u2();
-                let mut stack = Vec::with_capacity(number_of_stack_items as usize);
-                for _ in 0..number_of_stack_items {
+                let mut stack = Vec::with_capacity(self.u8_slice_to_u16(number_of_stack_items) as usize);
+                for _ in 0..self.u8_slice_to_u16(number_of_stack_items) {
                     stack.push(self.parse_verification_type_info()?);
                 }
 
@@ -919,8 +912,8 @@ impl<'clazz> ClassFileParser<'clazz> {
         let type_index = self.next_u2();
 
         let num_element_value_pairs = self.next_u2();
-        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
-        for _ in 0..num_element_value_pairs {
+        let mut element_value_pairs = Vec::with_capacity(self.u8_slice_to_u16(num_element_value_pairs) as usize);
+        for _ in 0..self.u8_slice_to_u16(num_element_value_pairs) {
             let element_name_index = self.next_u2();
             let value = self.parse_element_value()?;
 
@@ -966,8 +959,8 @@ impl<'clazz> ClassFileParser<'clazz> {
             }
             '[' => {
                 let num_values = self.next_u2();
-                let mut values = Vec::with_capacity(num_values as usize);
-                for _ in 0..num_values {
+                let mut values = Vec::with_capacity(self.u8_slice_to_u16(num_values) as usize);
+                for _ in 0..self.u8_slice_to_u16(num_values) {
                     values.push(self.parse_element_value()?);
                 }
 
@@ -981,8 +974,8 @@ impl<'clazz> ClassFileParser<'clazz> {
 
     fn parse_parameter_annotation(&mut self) -> ParseResult<ParameterAnnotation> {
         let num_annotations = self.next_u2();
-        let mut annotations = Vec::with_capacity(num_annotations as usize);
-        for _ in 0..num_annotations {
+        let mut annotations = Vec::with_capacity(self.u8_slice_to_u16(num_annotations) as usize);
+        for _ in 0..self.u8_slice_to_u16(num_annotations) {
             annotations.push(self.parse_annotation()?);
         }
 
@@ -1031,9 +1024,9 @@ impl<'clazz> ClassFileParser<'clazz> {
             }
             0x40 | 0x41 => {
                 let table_length = self.next_u2();
-                let mut table = Vec::with_capacity(table_length as usize);
+                let mut table = Vec::with_capacity(self.u8_slice_to_u16(table_length) as usize);
 
-                for _ in 0..table_length {
+                for _ in 0..self.u8_slice_to_u16(table_length) {
                     let start_pc = self.next_u2();
                     let length = self.next_u2();
                     let index = self.next_u2();
@@ -1089,8 +1082,8 @@ impl<'clazz> ClassFileParser<'clazz> {
         let type_index = self.next_u2();
 
         let num_element_value_pairs = self.next_u2();
-        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
-        for _ in 0..num_element_value_pairs {
+        let mut element_value_pairs = Vec::with_capacity(self.u8_slice_to_u16(num_element_value_pairs) as usize);
+        for _ in 0..self.u8_slice_to_u16(num_element_value_pairs) {
             let element_name_index = self.next_u2();
             let value = self.parse_element_value()?;
 
@@ -1122,7 +1115,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let name_index = self.next_u2();
             let descriptor_index = self.next_u2();
             let attributes_count = self.next_u2();
-            let attributes = self.parse_attributes(attributes_count, constant_pool)?;
+            let attributes = self.parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?;
 
             vec.push(MethodInfo {
                 access_flags,
