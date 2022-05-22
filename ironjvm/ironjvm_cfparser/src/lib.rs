@@ -50,14 +50,12 @@ mod error;
 
 pub struct ClassFileParser<'clazz> {
     classfile: &'clazz [u8],
-    byte_index: usize,
 }
 
 impl<'clazz> ClassFileParser<'clazz> {
     pub fn new(classfile: &'clazz [u8]) -> Self {
         Self {
             classfile,
-            byte_index: 0,
         }
     }
 
@@ -66,7 +64,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         let minor_version = self.next_u2();
         let major_version = self.next_u2();
         let constant_pool_count = self.next_u2();
-        let constant_pool = self.parse_constant_pool(constant_pool_count)?;
+        let constant_pool = self.parse_constant_pool(self.u8_slice_to_u16(constant_pool_count))?;
         let access_flags = self.next_u2();
         let this_class = self.next_u2();
         let super_class = self.next_u2();
@@ -101,16 +99,16 @@ impl<'clazz> ClassFileParser<'clazz> {
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u1(&mut self) -> u8 {
-        let ret = self.classfile[self.byte_index];
-        self.byte_index += 1;
+        let ret = self.classfile[0];
+        self.classfile = &self.classfile[1..];
 
         ret
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
     fn next_u1_many(&mut self, len: usize) -> &'clazz [u8] {
-        let output = &self.classfile[self.byte_index..self.byte_index + len];
-        self.byte_index += len;
+        let output = &self.classfile[0..len];
+        self.classfile = &self.classfile[len..];
 
         output
     }
@@ -149,11 +147,10 @@ impl<'clazz> ClassFileParser<'clazz> {
         Ok(output)
     }
 
-    fn parse_constant_pool(&mut self, count: [u8; 2]) -> ParseResult<Vec<CpInfo<'clazz>>> {
-        let capacity = self.u8_slice_to_u16(count) as usize;
-        let mut pool = Vec::with_capacity(capacity);
+    fn parse_constant_pool(&mut self, count: u16) -> ParseResult<Vec<CpInfo<'clazz>>> {
+        let mut pool = Vec::with_capacity(count as usize - 1);
 
-        for _ in 0..capacity {
+        while pool.len() + 1 < count as usize {
             let tag = self.next_u1();
             let info = match tag {
                 1 => {

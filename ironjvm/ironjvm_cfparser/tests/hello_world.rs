@@ -16,34 +16,61 @@ fn hello_world() {
     let expect = expect_test::expect![["
 ClassFile {
     magic: 3405691582,
-    minor_version: 0,
-    major_version: 62,
-    constant_pool_count: 29,
+    minor_version: [
+        0,
+        0,
+    ],
+    major_version: [
+        0,
+        62,
+    ],
+    constant_pool_count: [
+        0,
+        29,
+    ],
     constant_pool: [
         CpInfo {
             tag: 10,
             info: ConstantMethodRef {
-                class_index: 2,
-                name_and_type_index: 3,
+                class_index: [
+                    0,
+                    2,
+                ],
+                name_and_type_index: [
+                    0,
+                    3,
+                ],
             },
         },
         CpInfo {
             tag: 7,
             info: ConstantClass {
-                name_index: 4,
+                name_index: [
+                    0,
+                    4,
+                ],
             },
         },
         CpInfo {
             tag: 12,
             info: ConstantNameAndType {
-                name_index: 5,
-                descriptor_index: 6,
+                name_index: [
+                    0,
+                    5,
+                ],
+                descriptor_index: [
+                    0,
+                    6,
+                ],
             },
         },
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 16,
+                length: [
+                    0,
+                    16,
+                ],
                 bytes: [
                     106,
                     97,
@@ -67,7 +94,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 6,
+                length: [
+                    0,
+                    6,
+                ],
                 bytes: [
                     60,
                     105,
@@ -81,7 +111,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 3,
+                length: [
+                    0,
+                    3,
+                ],
                 bytes: [
                     40,
                     41,
@@ -92,27 +125,45 @@ ClassFile {
         CpInfo {
             tag: 9,
             info: ConstantFieldRef {
-                class_index: 8,
-                name_and_type_index: 9,
+                class_index: [
+                    0,
+                    8,
+                ],
+                name_and_type_index: [
+                    0,
+                    9,
+                ],
             },
         },
         CpInfo {
             tag: 7,
             info: ConstantClass {
-                name_index: 10,
+                name_index: [
+                    0,
+                    10,
+                ],
             },
         },
         CpInfo {
             tag: 12,
             info: ConstantNameAndType {
-                name_index: 11,
-                descriptor_index: 12,
+                name_index: [
+                    0,
+                    11,
+                ],
+                descriptor_index: [
+                    0,
+                    12,
+                ],
             },
         },
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 16,
+                length: [
+                    0,
+                    16,
+                ],
                 bytes: [
                     106,
                     97,
@@ -136,7 +187,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 3,
+                length: [
+                    0,
+                    3,
+                ],
                 bytes: [
                     111,
                     117,
@@ -147,7 +201,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 21,
+                length: [
+                    0,
+                    21,
+                ],
                 bytes: [
                     76,
                     106,
@@ -176,13 +233,19 @@ ClassFile {
         CpInfo {
             tag: 8,
             info: ConstantString {
-                string_index: 14,
+                string_index: [
+                    0,
+                    14,
+                ],
             },
         },
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 24,
+                length: [
+                    0,
+                    24,
+                ],
                 bytes: [
                     72,
                     101,
@@ -214,27 +277,45 @@ ClassFile {
         CpInfo {
             tag: 10,
             info: ConstantMethodRef {
-                class_index: 16,
-                name_and_type_index: 17,
+                class_index: [
+                    0,
+                    16,
+                ],
+                name_and_type_index: [
+                    0,
+                    17,
+                ],
             },
         },
         CpInfo {
             tag: 7,
             info: ConstantClass {
-                name_index: 18,
+                name_index: [
+                    0,
+                    18,
+                ],
             },
         },
         CpInfo {
             tag: 12,
             info: ConstantNameAndType {
-                name_index: 19,
-                descriptor_index: 20,
+                name_index: [
+                    0,
+                    19,
+                ],
+                descriptor_index: [
+                    0,
+                    20,
+                ],
             },
         },
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 19,
+                length: [
+                    0,
+                    19,
+                ],
                 bytes: [
                     106,
                     97,
@@ -261,7 +342,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 7,
+                length: [
+                    0,
+                    7,
+                ],
                 bytes: [
                     112,
                     114,
@@ -276,7 +360,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 21,
+                length: [
+                    0,
+                    21,
+                ],
                 bytes: [
                     40,
                     76,
@@ -305,13 +392,19 @@ ClassFile {
         CpInfo {
             tag: 7,
             info: ConstantClass {
-                name_index: 22,
+                name_index: [
+                    0,
+                    22,
+                ],
             },
         },
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 49,
+                length: [
+                    0,
+                    49,
+                ],
                 bytes: [
                     99,
                     111,
@@ -368,7 +461,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 4,
+                length: [
+                    0,
+                    4,
+                ],
                 bytes: [
                     67,
                     111,
@@ -380,7 +476,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 15,
+                length: [
+                    0,
+                    15,
+                ],
                 bytes: [
                     76,
                     105,
@@ -403,7 +502,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 4,
+                length: [
+                    0,
+                    4,
+                ],
                 bytes: [
                     109,
                     97,
@@ -415,7 +517,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 22,
+                length: [
+                    0,
+                    22,
+                ],
                 bytes: [
                     40,
                     91,
@@ -445,7 +550,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 10,
+                length: [
+                    0,
+                    10,
+                ],
                 bytes: [
                     83,
                     111,
@@ -463,7 +571,10 @@ ClassFile {
         CpInfo {
             tag: 1,
             info: ConstantUtf8 {
-                length: 15,
+                length: [
+                    0,
+                    15,
+                ],
                 bytes: [
                     72,
                     101,
@@ -484,27 +595,66 @@ ClassFile {
             },
         },
     ],
-    access_flags: 33,
-    this_class: 21,
-    super_class: 2,
-    interfaces_count: 0,
+    access_flags: [
+        0,
+        33,
+    ],
+    this_class: [
+        0,
+        21,
+    ],
+    super_class: [
+        0,
+        2,
+    ],
+    interfaces_count: [
+        0,
+        0,
+    ],
     interfaces: [],
-    fields_count: 0,
+    fields_count: [
+        0,
+        0,
+    ],
     fields: [],
-    methods_count: 2,
+    methods_count: [
+        0,
+        2,
+    ],
     methods: [
         MethodInfo {
-            access_flags: 1,
-            name_index: 5,
-            descriptor_index: 6,
-            attributes_count: 1,
+            access_flags: [
+                0,
+                1,
+            ],
+            name_index: [
+                0,
+                5,
+            ],
+            descriptor_index: [
+                0,
+                6,
+            ],
+            attributes_count: [
+                0,
+                1,
+            ],
             attributes: [
                 AttributeInfo {
-                    attribute_name_index: 23,
+                    attribute_name_index: [
+                        0,
+                        23,
+                    ],
                     attribute_length: 29,
                     info: CodeAttribute {
-                        max_stack: 1,
-                        max_locals: 1,
+                        max_stack: [
+                            0,
+                            1,
+                        ],
+                        max_locals: [
+                            0,
+                            1,
+                        ],
                         code_length: 5,
                         code: [
                             42,
@@ -513,19 +663,37 @@ ClassFile {
                             1,
                             177,
                         ],
-                        exception_table_length: 0,
+                        exception_table_length: [
+                            0,
+                            0,
+                        ],
                         exception_table: [],
-                        attributes_count: 1,
+                        attributes_count: [
+                            0,
+                            1,
+                        ],
                         attributes: [
                             AttributeInfo {
-                                attribute_name_index: 24,
+                                attribute_name_index: [
+                                    0,
+                                    24,
+                                ],
                                 attribute_length: 6,
                                 info: LineNumberTableAttribute {
-                                    line_number_table_length: 1,
+                                    line_number_table_length: [
+                                        0,
+                                        1,
+                                    ],
                                     line_number_table: [
                                         LineNumber {
-                                            start_pc: 0,
-                                            line_number: 3,
+                                            start_pc: [
+                                                0,
+                                                0,
+                                            ],
+                                            line_number: [
+                                                0,
+                                                3,
+                                            ],
                                         },
                                     ],
                                 },
@@ -536,17 +704,38 @@ ClassFile {
             ],
         },
         MethodInfo {
-            access_flags: 9,
-            name_index: 25,
-            descriptor_index: 26,
-            attributes_count: 1,
+            access_flags: [
+                0,
+                9,
+            ],
+            name_index: [
+                0,
+                25,
+            ],
+            descriptor_index: [
+                0,
+                26,
+            ],
+            attributes_count: [
+                0,
+                1,
+            ],
             attributes: [
                 AttributeInfo {
-                    attribute_name_index: 23,
+                    attribute_name_index: [
+                        0,
+                        23,
+                    ],
                     attribute_length: 37,
                     info: CodeAttribute {
-                        max_stack: 2,
-                        max_locals: 1,
+                        max_stack: [
+                            0,
+                            2,
+                        ],
+                        max_locals: [
+                            0,
+                            1,
+                        ],
                         code_length: 9,
                         code: [
                             178,
@@ -559,23 +748,47 @@ ClassFile {
                             15,
                             177,
                         ],
-                        exception_table_length: 0,
+                        exception_table_length: [
+                            0,
+                            0,
+                        ],
                         exception_table: [],
-                        attributes_count: 1,
+                        attributes_count: [
+                            0,
+                            1,
+                        ],
                         attributes: [
                             AttributeInfo {
-                                attribute_name_index: 24,
+                                attribute_name_index: [
+                                    0,
+                                    24,
+                                ],
                                 attribute_length: 10,
                                 info: LineNumberTableAttribute {
-                                    line_number_table_length: 2,
+                                    line_number_table_length: [
+                                        0,
+                                        2,
+                                    ],
                                     line_number_table: [
                                         LineNumber {
-                                            start_pc: 0,
-                                            line_number: 5,
+                                            start_pc: [
+                                                0,
+                                                0,
+                                            ],
+                                            line_number: [
+                                                0,
+                                                5,
+                                            ],
                                         },
                                         LineNumber {
-                                            start_pc: 8,
-                                            line_number: 6,
+                                            start_pc: [
+                                                0,
+                                                8,
+                                            ],
+                                            line_number: [
+                                                0,
+                                                6,
+                                            ],
                                         },
                                     ],
                                 },
@@ -586,13 +799,22 @@ ClassFile {
             ],
         },
     ],
-    attributes_count: 1,
+    attributes_count: [
+        0,
+        1,
+    ],
     attributes: [
         AttributeInfo {
-            attribute_name_index: 27,
+            attribute_name_index: [
+                0,
+                27,
+            ],
             attribute_length: 2,
             info: SourceFileAttribute {
-                sourcefile_index: 28,
+                sourcefile_index: [
+                    0,
+                    28,
+                ],
             },
         },
     ],
