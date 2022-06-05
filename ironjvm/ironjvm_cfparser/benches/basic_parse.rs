@@ -5,7 +5,8 @@ fn basic_parse(criterion: &mut Criterion) {
     criterion.bench_function("Hello World", |bencher| {
         let file = std::fs::read(
             "../test_classes/com/github/htgazurex1212/ironjvm/tests/HelloWorld.class",
-        ).unwrap();
+        )
+        .unwrap();
 
         bencher.iter(|| {
             let mut parser = ClassFileParser::new(&file);

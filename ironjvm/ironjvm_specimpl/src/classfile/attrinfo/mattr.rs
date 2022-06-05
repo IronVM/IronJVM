@@ -23,7 +23,7 @@ pub struct ModuleExport<'clazz> {
     pub exports_index: [u8; 2],
     pub exports_flags: [u8; 2],
     pub exports_to_count: [u8; 2],
-    pub exports_to_index: &'clazz[[u8; 2]],
+    pub exports_to_index: &'clazz [[u8; 2]],
 }
 
 #[derive(Debug)]
@@ -31,14 +31,14 @@ pub struct ModuleOpen<'clazz> {
     pub opens_index: [u8; 2],
     pub opens_flags: [u8; 2],
     pub opens_to_count: [u8; 2],
-    pub opens_to_index: &'clazz[[u8; 2]],
+    pub opens_to_index: &'clazz [[u8; 2]],
 }
 
 #[derive(Debug)]
 pub struct ModuleProvide<'clazz> {
     pub provides_index: [u8; 2],
     pub provides_with_count: [u8; 2],
-    pub provides_with_index: &'clazz[[u8; 2]],
+    pub provides_with_index: &'clazz [[u8; 2]],
 }
 
 #[derive(Debug)]
