@@ -251,7 +251,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
                     true
                 })
-                .map(|cp_info| cp_info.info) else {
+                .map(|cp_info| cp_info.info.clone()) else {
                 return false;
             };
 
@@ -276,7 +276,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
                 self.check_field_descriptor(chars.as_str())
             }
-            _ => false
+            _ => false,
         }
     }
 }
