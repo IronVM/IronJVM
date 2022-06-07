@@ -25,7 +25,8 @@ use std::str;
 
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::flags::{ClassAccessFlags, FieldAccessFlags, FlagsExt};
-use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::{ClassFile, FieldInfo};
+use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 
 use crate::error::{CheckError, CheckResult};
 
@@ -255,12 +256,42 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 return false;
             };
 
-            self.check_field_descriptor(unsafe { str::from_utf8_unchecked(bytes) })
+            !self.check_field_descriptor(unsafe { str::from_utf8_unchecked(bytes) })
         }) {
             return Err(CheckError::InvalidFieldDescriptor);
         }
 
+        if self.classfile.fields.iter().any(|field| {
+            !self.check_field_attributes(field)
+        }) {
+            return Err(CheckError::InvalidFieldAttributes);
+        }
+
         Ok(())
+    }
+
+    fn check_field_attributes(&self, field: &FieldInfo) -> bool {
+        assert_eq!(self.u8_slice_to_u16(field.attributes_count) as usize, field.attributes.len());
+
+        if field.attributes.iter().any(|attribute| {
+            let major = self.u8_slice_to_u16(self.classfile.major_version);
+
+            !match attribute.info {
+                AttributeInfoType::ConstantValueAttribute { .. }
+                | AttributeInfoType::DeprecatedAttribute
+                | AttributeInfoType::SyntheticAttribute  => true,
+                AttributeInfoType::SignatureAttribute { .. }
+                | AttributeInfoType::RuntimeInvisibleAnnotationsAttribute { .. }
+                | AttributeInfoType::RuntimeVisibleAnnotationsAttribute { .. } if major >= 49 => true,
+                AttributeInfoType::RuntimeInvisibleTypeAnnotationsAttribute { .. }
+                | AttributeInfoType::RuntimeVisibleTypeAnnotationsAttribute { .. } if major >= 52 => true,
+                _ => false
+            }
+        }) {
+            return false;
+        }
+
+        true
     }
 
     fn check_field_descriptor(&self, descriptor: &str) -> bool {
