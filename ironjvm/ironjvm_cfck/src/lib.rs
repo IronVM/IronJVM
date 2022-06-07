@@ -57,29 +57,25 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_cfver(&self) -> CheckResult<()> {
-        if !(45u16..=62u16).contains(&self.u8_slice_to_u16(self.classfile.major_version)) {
-            return Err(CheckError::UnsupportedMajor {
-                major: self.classfile.major_version,
-            });
+        let major = self.u8_slice_to_u16(self.classfile.major_version);
+        let minor = self.u8_slice_to_u16(self.classfile.minor_version);
+
+        if !(45u16..=62u16).contains(&major) {
+            return Err(CheckError::UnsupportedMajor { major });
         }
 
-        if self.u8_slice_to_u16(self.classfile.major_version) > 56
-            && ![0, 65535].contains(&self.u8_slice_to_u16(self.classfile.minor_version))
-        {
-            return Err(CheckError::InvalidMinor {
-                minor: self.classfile.minor_version,
-            });
+        if major > 56 && ![0, 65535].contains(&minor) {
+            return Err(CheckError::InvalidMinor { minor });
         }
 
         Ok(())
     }
 
     fn check_class_accflags(&mut self) -> CheckResult<()> {
-        if self
-            .u8_slice_to_u16(self.classfile.access_flags)
-            .flag_set(ClassAccessFlags::ACC_MODULE)
-        {
-            if self.u8_slice_to_u16(self.classfile.access_flags) != ClassAccessFlags::ACC_MODULE {
+        let access_flags = self.u8_slice_to_u16(self.classfile.access_flags);
+
+        if access_flags.flag_set(ClassAccessFlags::ACC_MODULE) {
+            if access_flags != ClassAccessFlags::ACC_MODULE {
                 return Err(CheckError::NotOnlyModuleFlagSet);
             }
 
@@ -92,28 +88,18 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Ok(());
         }
 
-        if self
-            .u8_slice_to_u16(self.classfile.access_flags)
-            .flag_set(ClassAccessFlags::ACC_INTERFACE)
-        {
-            if !self
-                .u8_slice_to_u16(self.classfile.access_flags)
-                .flag_set(ClassAccessFlags::ACC_ABSTRACT)
-            {
+        if access_flags.flag_set(ClassAccessFlags::ACC_INTERFACE) {
+            if access_flags.flag_set(ClassAccessFlags::ACC_ABSTRACT) {
                 return Err(CheckError::InterfaceFlagWithoutAbstractFlag);
             }
 
-            if self
-                .u8_slice_to_u16(self.classfile.access_flags)
+            if access_flags
                 .flag_set(ClassAccessFlags::ACC_FINAL)
-                || self
-                    .u8_slice_to_u16(self.classfile.access_flags)
+                || access_flags
                     .flag_set(ClassAccessFlags::ACC_SUPER)
-                || self
-                    .u8_slice_to_u16(self.classfile.access_flags)
+                || access_flags
                     .flag_set(ClassAccessFlags::ACC_ENUM)
-                || self
-                    .u8_slice_to_u16(self.classfile.access_flags)
+                || access_flags
                     .flag_set(ClassAccessFlags::ACC_MODULE)
             {
                 return Err(CheckError::InvalidFlagsWithInterfaceFlag);
@@ -122,18 +108,15 @@ impl<'clazz> ClassFileChecker<'clazz> {
             self.state.is_interface = true;
         }
 
-        if self
-            .u8_slice_to_u16(self.classfile.access_flags)
+        if access_flags
             .flag_set(ClassAccessFlags::ACC_ABSTRACT | ClassAccessFlags::ACC_FINAL)
         {
             return Err(CheckError::FinalAbstractFlagsSetSimultaneously);
         }
 
-        if self
-            .u8_slice_to_u16(self.classfile.access_flags)
+        if access_flags
             .flag_set(ClassAccessFlags::ACC_ANNOTATION)
-            && !self
-                .u8_slice_to_u16(self.classfile.access_flags)
+            && !access_flags
                 .flag_set(ClassAccessFlags::ACC_INTERFACE)
         {
             return Err(CheckError::AnnotationFlagWithoutInterfaceFlag);
@@ -155,12 +138,14 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_super_class(&self) -> CheckResult<()> {
-        if self.u8_slice_to_u16(self.classfile.super_class) == 0 {
+        let super_class = self.u8_slice_to_u16(self.classfile.super_class);
+
+        if super_class  == 0 {
             // FIXME: verify that this class actually represents java/lang/Object
             return Ok(());
         }
 
-        let Some(cp_info) = self.classfile.constant_pool.get((self.u8_slice_to_u16(self.classfile.super_class) - 1) as usize) else {
+        let Some(cp_info) = self.classfile.constant_pool.get((super_class - 1) as usize) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -202,15 +187,17 @@ impl<'clazz> ClassFileChecker<'clazz> {
     fn check_fields(&self) -> CheckResult<()> {
         if self.state.is_interface {
             if self.classfile.fields.iter().any(|field| {
-                !self.u8_slice_to_u16(field.access_flags).flag_set(
+                let access_flags = self.u8_slice_to_u16(field.access_flags);
+
+                !access_flags.flag_set(
                     FieldAccessFlags::ACC_PUBLIC
                         | FieldAccessFlags::ACC_STATIC
                         | FieldAccessFlags::ACC_FINAL,
-                ) || self.u8_slice_to_u16(field.access_flags)
+                ) || access_flags
                     != FieldAccessFlags::ACC_PUBLIC
                         | FieldAccessFlags::ACC_STATIC
                         | FieldAccessFlags::ACC_FINAL
-                    || self.u8_slice_to_u16(field.access_flags)
+                    || access_flags
                         != FieldAccessFlags::ACC_PUBLIC
                             | FieldAccessFlags::ACC_STATIC
                             | FieldAccessFlags::ACC_FINAL
@@ -220,21 +207,19 @@ impl<'clazz> ClassFileChecker<'clazz> {
             }
         } else {
             if self.classfile.fields.iter().any(|field| {
-                self.u8_slice_to_u16(field.access_flags).flag_set(
+                let access_flags = self.u8_slice_to_u16(field.access_flags);
+
+                access_flags.flag_set(
                     FieldAccessFlags::ACC_PUBLIC
                         | FieldAccessFlags::ACC_PRIVATE
                         | FieldAccessFlags::ACC_PROTECTED,
-                ) || self
-                    .u8_slice_to_u16(field.access_flags)
+                ) || access_flags
                     .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PRIVATE)
-                    || self
-                        .u8_slice_to_u16(field.access_flags)
+                    || access_flags
                         .flag_set(FieldAccessFlags::ACC_PRIVATE | FieldAccessFlags::ACC_PROTECTED)
-                    || self
-                        .u8_slice_to_u16(field.access_flags)
+                    || access_flags
                         .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PROTECTED)
-                    || self
-                        .u8_slice_to_u16(field.access_flags)
+                    || access_flags
                         .flag_set(FieldAccessFlags::ACC_FINAL | FieldAccessFlags::ACC_VOLATILE)
             }) {
                 return Err(CheckError::InvalidFieldFlags);

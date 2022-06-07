@@ -28,11 +28,11 @@ pub enum CheckError {
     InvalidFieldFlags,
     InvalidFlagsWithInterfaceFlag,
     InvalidInterfaceFieldFlags,
-    InvalidMinor { minor: [u8; 2] },
+    InvalidMinor { minor: u16 },
     NotOnlyModuleFlagSet,
     SuperClassIndexNotConstantClass,
     ThisClassIndexNotConstantClass,
-    UnsupportedMajor { major: [u8; 2] },
+    UnsupportedMajor { major: u16 },
     UnsupportedModuleFlagForVersion,
 }
 
