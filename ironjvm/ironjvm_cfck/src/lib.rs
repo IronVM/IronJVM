@@ -18,7 +18,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#![feature(iter_advance_by)]
 #![feature(let_else)]
+
+use std::str;
 
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::flags::{ClassAccessFlags, FieldAccessFlags, FlagsExt};
@@ -118,7 +121,9 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_this_class(&self) -> CheckResult<()> {
-        let Some(cp_info) = self.classfile.constant_pool.get((self.u8_slice_to_u16(self.classfile.this_class) - 1) as usize) else {
+        let this_class = self.u8_slice_to_u16(self.classfile.this_class);
+
+        let Some(cp_info) = self.classfile.constant_pool.get((this_class - 1) as usize) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -219,10 +224,9 @@ impl<'clazz> ClassFileChecker<'clazz> {
         }
 
         if self.classfile.fields.iter().any(|field| {
-            let cp_index = field.name_index;
             self.classfile
                 .constant_pool
-                .get((self.u8_slice_to_u16(cp_index) - 1) as usize)
+                .get((self.u8_slice_to_u16(field.name_index) - 1) as usize)
                 .filter(|some| {
                     let CpInfoType::ConstantUtf8 { .. } = some.info else {
                     return false;
@@ -235,28 +239,45 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Err(CheckError::FieldNameIndexNotConstantUtf8);
         }
 
-        // if self.classfile.fields.iter().any(|field| {
-        //     let descriptor_index = field.descriptor_index;
-        //     let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.classfile
-        //         .constant_pool
-        //         .get((descriptor_index - 1) as usize)
-        //         .filter(|some| {
-        //             let CpInfoType::ConstantUtf8 { .. } = some.info else {
-        //                 return false;
-        //             };
-        //
-        //             true
-        //         })
-        //         .map(|cp_info| cp_info.info) else {
-        //         return false;
-        //     };
-        //
-        //     let _ = unsafe { String::from_utf8_unchecked(bytes.clone()) };
-        //
-        //     todo!()
-        // }) {}
+        if self.classfile.fields.iter().any(|field| {
+            let descriptor_index = self.u8_slice_to_u16(field.descriptor_index);
+            let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.classfile
+                .constant_pool
+                .get((descriptor_index - 1) as usize)
+                .filter(|some| {
+                    let CpInfoType::ConstantUtf8 { .. } = some.info else {
+                        return false;
+                    };
+
+                    true
+                })
+                .map(|cp_info| cp_info.info) else {
+                return false;
+            };
+
+            self.check_field_descriptor(unsafe { str::from_utf8_unchecked(bytes) })
+        }) {
+            return Err(CheckError::InvalidFieldDescriptor);
+        }
 
         Ok(())
+    }
+
+    fn check_field_descriptor(&self, descriptor: &str) -> bool {
+        match descriptor {
+            "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" => true,
+            str if str.starts_with("L") && str.ends_with(";") => true,
+            str if str.starts_with("[") => {
+                let dimensions = str.matches("[").count();
+                let mut chars = str.chars();
+                if chars.advance_by(dimensions).is_err() {
+                    return false;
+                }
+
+                self.check_field_descriptor(chars.as_str())
+            }
+            _ => false
+        }
     }
 }
 
