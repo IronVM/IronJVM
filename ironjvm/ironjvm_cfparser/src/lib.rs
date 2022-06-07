@@ -247,7 +247,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 name_index,
                 descriptor_index,
                 attributes_count,
-                attributes: self.parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?,
+                attributes: self
+                    .parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?,
             });
         }
 
@@ -305,8 +306,10 @@ impl<'clazz> ClassFileParser<'clazz> {
                         exception_table_length,
                         exception_table,
                         attributes_count,
-                        attributes: self
-                            .parse_attributes(self.u8_slice_to_u16(attributes_count), constant_pool)?,
+                        attributes: self.parse_attributes(
+                            self.u8_slice_to_u16(attributes_count),
+                            constant_pool,
+                        )?,
                     }
                 }
                 "StackMapTable" => {

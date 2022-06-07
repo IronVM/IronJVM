@@ -93,14 +93,10 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 return Err(CheckError::InterfaceFlagWithoutAbstractFlag);
             }
 
-            if access_flags
-                .flag_set(ClassAccessFlags::ACC_FINAL)
-                || access_flags
-                    .flag_set(ClassAccessFlags::ACC_SUPER)
-                || access_flags
-                    .flag_set(ClassAccessFlags::ACC_ENUM)
-                || access_flags
-                    .flag_set(ClassAccessFlags::ACC_MODULE)
+            if access_flags.flag_set(ClassAccessFlags::ACC_FINAL)
+                || access_flags.flag_set(ClassAccessFlags::ACC_SUPER)
+                || access_flags.flag_set(ClassAccessFlags::ACC_ENUM)
+                || access_flags.flag_set(ClassAccessFlags::ACC_MODULE)
             {
                 return Err(CheckError::InvalidFlagsWithInterfaceFlag);
             }
@@ -108,16 +104,12 @@ impl<'clazz> ClassFileChecker<'clazz> {
             self.state.is_interface = true;
         }
 
-        if access_flags
-            .flag_set(ClassAccessFlags::ACC_ABSTRACT | ClassAccessFlags::ACC_FINAL)
-        {
+        if access_flags.flag_set(ClassAccessFlags::ACC_ABSTRACT | ClassAccessFlags::ACC_FINAL) {
             return Err(CheckError::FinalAbstractFlagsSetSimultaneously);
         }
 
-        if access_flags
-            .flag_set(ClassAccessFlags::ACC_ANNOTATION)
-            && !access_flags
-                .flag_set(ClassAccessFlags::ACC_INTERFACE)
+        if access_flags.flag_set(ClassAccessFlags::ACC_ANNOTATION)
+            && !access_flags.flag_set(ClassAccessFlags::ACC_INTERFACE)
         {
             return Err(CheckError::AnnotationFlagWithoutInterfaceFlag);
         }
@@ -140,7 +132,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     fn check_super_class(&self) -> CheckResult<()> {
         let super_class = self.u8_slice_to_u16(self.classfile.super_class);
 
-        if super_class  == 0 {
+        if super_class == 0 {
             // FIXME: verify that this class actually represents java/lang/Object
             return Ok(());
         }
