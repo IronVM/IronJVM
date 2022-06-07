@@ -714,13 +714,13 @@ impl<'clazz> ClassFileParser<'clazz> {
         Ok(match frame_type {
             0..=63 => StackMapFrame::SameFrame { frame_type },
             64..=127 => {
-                let stack = self.parse_verification_type_info()?;
+                let stack = self.parse_verification_type_info();
 
                 StackMapFrame::SameLocals1StackItemFrame { frame_type, stack }
             }
             247 => {
                 let offset_delta = self.next_u2();
-                let stack = self.parse_verification_type_info()?;
+                let stack = self.parse_verification_type_info();
 
                 StackMapFrame::SameLocals1StackItemFrameExtended {
                     frame_type,
@@ -750,7 +750,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 let locals_length = frame_type - 251;
                 let mut locals = Vec::with_capacity(locals_length as usize);
                 while locals.len() < locals_length as usize {
-                    locals.push(self.parse_verification_type_info()?);
+                    locals.push(self.parse_verification_type_info());
                 }
 
                 StackMapFrame::AppendFrame {
@@ -766,14 +766,14 @@ impl<'clazz> ClassFileParser<'clazz> {
                 let length = self.u8_slice_to_u16(number_of_locals);
                 let mut locals = Vec::with_capacity(length as usize);
                 while locals.len() < length as usize {
-                    locals.push(self.parse_verification_type_info()?);
+                    locals.push(self.parse_verification_type_info());
                 }
 
                 let number_of_stack_items = self.next_u2();
                 let length = self.u8_slice_to_u16(number_of_stack_items);
                 let mut stack = Vec::with_capacity(length as usize);
                 while stack.len() < length as usize {
-                    stack.push(self.parse_verification_type_info()?);
+                    stack.push(self.parse_verification_type_info());
                 }
 
                 StackMapFrame::FullFrame {
@@ -789,10 +789,10 @@ impl<'clazz> ClassFileParser<'clazz> {
         })
     }
 
-    fn parse_verification_type_info(&mut self) -> ParseResult<VerificationTypeInfo> {
+    fn parse_verification_type_info(&mut self) -> VerificationTypeInfo {
         let tag = self.next_u1();
 
-        Ok(match tag {
+        match tag {
             0 => VerificationTypeInfo::TopVariableInfo { tag },
             1 => VerificationTypeInfo::IntegerVariableInfo { tag },
             2 => VerificationTypeInfo::FloatVariableInfo { tag },
@@ -809,7 +809,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 offset: self.next_u2(),
             },
             _ => unreachable!(),
-        })
+        }
     }
 
     fn parse_annotation(&mut self) -> ParseResult<Annotation> {
