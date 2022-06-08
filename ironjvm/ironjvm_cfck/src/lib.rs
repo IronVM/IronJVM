@@ -23,10 +23,13 @@
 
 use std::str;
 
-use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::flags::{ClassAccessFlags, FieldAccessFlags, FlagsExt};
-use ironjvm_specimpl::classfile::{ClassFile, FieldInfo};
+use ironjvm_javautil::be::JavaBeUtil;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
+use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
+use ironjvm_specimpl::classfile::flags::{
+    ClassAccessFlags, FieldAccessFlags, FlagsExt, MethodAccessFlags,
+};
+use ironjvm_specimpl::classfile::{ClassFile, FieldInfo};
 
 use crate::error::{CheckError, CheckResult};
 
@@ -39,15 +42,17 @@ pub struct ClassFileChecker<'clazz> {
 
 impl<'clazz> ClassFileChecker<'clazz> {
     pub fn new(classfile: ClassFile<'clazz>) -> Self {
+        let major = JavaBeUtil::u8_slice_to_u16(classfile.major_version);
+
         Self {
             classfile,
-            state: ClassFileCheckerState::default(),
+            state: ClassFileCheckerState::new(major),
         }
     }
 
     pub fn check(&mut self) -> CheckResult<()> {
-        self.check_cfver()?;
-        self.check_class_accflags()?;
+        self.check_classfile_version()?;
+        self.check_class_access_flags()?;
         self.check_this_class()?;
         self.check_super_class()?;
         self.check_interfaces()?;
@@ -56,34 +61,31 @@ impl<'clazz> ClassFileChecker<'clazz> {
         todo!()
     }
 
-    fn u8_slice_to_u16(&self, bytes: [u8; 2]) -> u16 {
-        u16::from_be_bytes(bytes)
-    }
+    fn check_classfile_version(&self) -> CheckResult<()> {
+        let minor = JavaBeUtil::u8_slice_to_u16(self.classfile.minor_version);
 
-    fn check_cfver(&self) -> CheckResult<()> {
-        let major = self.u8_slice_to_u16(self.classfile.major_version);
-        let minor = self.u8_slice_to_u16(self.classfile.minor_version);
-
-        if !(45u16..=62u16).contains(&major) {
-            return Err(CheckError::UnsupportedMajor { major });
+        if !(45u16..=62u16).contains(&self.state.major) {
+            return Err(CheckError::UnsupportedMajor {
+                major: self.state.major,
+            });
         }
 
-        if major > 56 && ![0, 65535].contains(&minor) {
+        if self.state.major > 56 && ![0, 65535].contains(&minor) {
             return Err(CheckError::InvalidMinor { minor });
         }
 
         Ok(())
     }
 
-    fn check_class_accflags(&mut self) -> CheckResult<()> {
-        let access_flags = self.u8_slice_to_u16(self.classfile.access_flags);
+    fn check_class_access_flags(&mut self) -> CheckResult<()> {
+        let access_flags = JavaBeUtil::u8_slice_to_u16(self.classfile.access_flags);
 
         if access_flags.flag_set(ClassAccessFlags::ACC_MODULE) {
             if access_flags != ClassAccessFlags::ACC_MODULE {
                 return Err(CheckError::NotOnlyModuleFlagSet);
             }
 
-            if self.u8_slice_to_u16(self.classfile.major_version) < 53 {
+            if self.state.major < 53 {
                 return Err(CheckError::UnsupportedModuleFlagForVersion);
             }
 
@@ -122,7 +124,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_this_class(&self) -> CheckResult<()> {
-        let this_class = self.u8_slice_to_u16(self.classfile.this_class);
+        let this_class = JavaBeUtil::u8_slice_to_u16(self.classfile.this_class);
 
         let Some(cp_info) = self.classfile.constant_pool.get((this_class - 1) as usize) else {
             return Err(CheckError::InvalidConstantPoolIndex);
@@ -136,7 +138,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_super_class(&self) -> CheckResult<()> {
-        let super_class = self.u8_slice_to_u16(self.classfile.super_class);
+        let super_class = JavaBeUtil::u8_slice_to_u16(self.classfile.super_class);
 
         if super_class == 0 {
             // FIXME: verify that this class actually represents java/lang/Object
@@ -156,7 +158,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
     fn check_interfaces(&self) -> CheckResult<()> {
         assert_eq!(
-            self.u8_slice_to_u16(self.classfile.interfaces_count) as usize,
+            JavaBeUtil::u8_slice_to_u16(self.classfile.interfaces_count) as usize,
             self.classfile.interfaces.len()
         );
 
@@ -164,7 +166,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
             let cp_info_opt = self
                 .classfile
                 .constant_pool
-                .get((self.u8_slice_to_u16(*interface_index) - 1) as usize);
+                .get((JavaBeUtil::u8_slice_to_u16(*interface_index) - 1) as usize);
 
             if cp_info_opt.is_none() {
                 return true;
@@ -183,51 +185,14 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_fields(&self) -> CheckResult<()> {
-        if self.state.is_interface {
-            if self.classfile.fields.iter().any(|field| {
-                let access_flags = self.u8_slice_to_u16(field.access_flags);
+        self.check_field_access_flags()?;
 
-                !access_flags.flag_set(
-                    FieldAccessFlags::ACC_PUBLIC
-                        | FieldAccessFlags::ACC_STATIC
-                        | FieldAccessFlags::ACC_FINAL,
-                ) || access_flags
-                    != FieldAccessFlags::ACC_PUBLIC
-                        | FieldAccessFlags::ACC_STATIC
-                        | FieldAccessFlags::ACC_FINAL
-                    || access_flags
-                        != FieldAccessFlags::ACC_PUBLIC
-                            | FieldAccessFlags::ACC_STATIC
-                            | FieldAccessFlags::ACC_FINAL
-                            | FieldAccessFlags::ACC_SYNTHETIC
-            }) {
-                return Err(CheckError::InvalidInterfaceFieldFlags);
-            }
-        } else {
-            if self.classfile.fields.iter().any(|field| {
-                let access_flags = self.u8_slice_to_u16(field.access_flags);
+        let mut fields_iter = self.classfile.fields.iter();
 
-                access_flags.flag_set(
-                    FieldAccessFlags::ACC_PUBLIC
-                        | FieldAccessFlags::ACC_PRIVATE
-                        | FieldAccessFlags::ACC_PROTECTED,
-                ) || access_flags
-                    .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PRIVATE)
-                    || access_flags
-                        .flag_set(FieldAccessFlags::ACC_PRIVATE | FieldAccessFlags::ACC_PROTECTED)
-                    || access_flags
-                        .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PROTECTED)
-                    || access_flags
-                        .flag_set(FieldAccessFlags::ACC_FINAL | FieldAccessFlags::ACC_VOLATILE)
-            }) {
-                return Err(CheckError::InvalidFieldFlags);
-            }
-        }
-
-        if self.classfile.fields.iter().any(|field| {
+        if fields_iter.any(|field| {
             self.classfile
                 .constant_pool
-                .get((self.u8_slice_to_u16(field.name_index) - 1) as usize)
+                .get((JavaBeUtil::u8_slice_to_u16(field.name_index) - 1) as usize)
                 .filter(|some| {
                     let CpInfoType::ConstantUtf8 { .. } = some.info else {
                     return false;
@@ -240,8 +205,8 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Err(CheckError::FieldNameIndexNotConstantUtf8);
         }
 
-        if self.classfile.fields.iter().any(|field| {
-            let descriptor_index = self.u8_slice_to_u16(field.descriptor_index);
+        if fields_iter.any(|field| {
+            let descriptor_index = JavaBeUtil::u8_slice_to_u16(field.descriptor_index);
             let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.classfile
                 .constant_pool
                 .get((descriptor_index - 1) as usize)
@@ -261,33 +226,89 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Err(CheckError::InvalidFieldDescriptor);
         }
 
-        if self.classfile.fields.iter().any(|field| {
-            !self.check_field_attributes(field)
-        }) {
+        if fields_iter.any(|field| !self.check_field_attributes(field)) {
             return Err(CheckError::InvalidFieldAttributes);
         }
 
         Ok(())
     }
 
+    fn check_field_access_flags(&self) -> CheckResult<()> {
+        let mut fields_iter = self.classfile.fields.iter();
+
+        if self.state.is_interface {
+            if fields_iter.any(|field| {
+                let access_flags = JavaBeUtil::u8_slice_to_u16(field.access_flags);
+
+                !access_flags.flag_set(
+                    FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_STATIC
+                        | FieldAccessFlags::ACC_FINAL,
+                ) || access_flags
+                    != FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_STATIC
+                        | FieldAccessFlags::ACC_FINAL
+                    || access_flags
+                        != FieldAccessFlags::ACC_PUBLIC
+                            | FieldAccessFlags::ACC_STATIC
+                            | FieldAccessFlags::ACC_FINAL
+                            | FieldAccessFlags::ACC_SYNTHETIC
+            }) {
+                return Err(CheckError::InvalidInterfaceFieldFlags);
+            }
+        } else {
+            if fields_iter.any(|field| {
+                let access_flags = JavaBeUtil::u8_slice_to_u16(field.access_flags);
+
+                access_flags.flag_set(
+                    FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_PRIVATE
+                        | FieldAccessFlags::ACC_PROTECTED,
+                ) || access_flags
+                    .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PRIVATE)
+                    || access_flags
+                        .flag_set(FieldAccessFlags::ACC_PRIVATE | FieldAccessFlags::ACC_PROTECTED)
+                    || access_flags
+                        .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PROTECTED)
+                    || access_flags
+                        .flag_set(FieldAccessFlags::ACC_FINAL | FieldAccessFlags::ACC_VOLATILE)
+            }) {
+                return Err(CheckError::InvalidFieldFlags);
+            }
+        }
+
+        Ok(())
+    }
+
     fn check_field_attributes(&self, field: &FieldInfo) -> bool {
-        assert_eq!(self.u8_slice_to_u16(field.attributes_count) as usize, field.attributes.len());
+        assert_eq!(
+            JavaBeUtil::u8_slice_to_u16(field.attributes_count) as usize,
+            field.attributes.len()
+        );
 
-        if field.attributes.iter().any(|attribute| {
-            let major = self.u8_slice_to_u16(self.classfile.major_version);
-
-            !match attribute.info {
+        if field
+            .attributes
+            .iter()
+            .any(|attribute| !match attribute.info {
                 AttributeInfoType::ConstantValueAttribute { .. }
                 | AttributeInfoType::DeprecatedAttribute
-                | AttributeInfoType::SyntheticAttribute  => true,
+                | AttributeInfoType::SyntheticAttribute => true,
                 AttributeInfoType::SignatureAttribute { .. }
                 | AttributeInfoType::RuntimeInvisibleAnnotationsAttribute { .. }
-                | AttributeInfoType::RuntimeVisibleAnnotationsAttribute { .. } if major >= 49 => true,
+                | AttributeInfoType::RuntimeVisibleAnnotationsAttribute { .. }
+                    if self.state.major >= 49 =>
+                {
+                    true
+                }
                 AttributeInfoType::RuntimeInvisibleTypeAnnotationsAttribute { .. }
-                | AttributeInfoType::RuntimeVisibleTypeAnnotationsAttribute { .. } if major >= 52 => true,
-                _ => false
-            }
-        }) {
+                | AttributeInfoType::RuntimeVisibleTypeAnnotationsAttribute { .. }
+                    if self.state.major >= 52 =>
+                {
+                    true
+                }
+                _ => false,
+            })
+        {
             return false;
         }
 
@@ -310,18 +331,107 @@ impl<'clazz> ClassFileChecker<'clazz> {
             _ => false,
         }
     }
+
+    fn check_methods(&self) -> CheckResult<()> {
+        self.check_method_access_flags()?;
+
+        Ok(())
+    }
+
+    fn check_method_access_flags(&self) -> CheckResult<()> {
+        let mut methods_iter = self.classfile.methods.iter();
+
+        if self.state.is_interface {
+            if methods_iter.any(|method| {
+                let access_flags = JavaBeUtil::u8_slice_to_u16(method.access_flags);
+
+                access_flags.flag_set(MethodAccessFlags::ACC_PROTECTED)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_FINAL)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_SYNCHRONIZED)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_NATIVE)
+            }) {
+                return Err(CheckError::InvalidInterfaceMethodFlags);
+            }
+
+            if self.state.major < 52 {
+                if methods_iter.any(|method| {
+                    let access_flags = JavaBeUtil::u8_slice_to_u16(method.access_flags);
+
+                    !access_flags
+                        .flag_set(MethodAccessFlags::ACC_PUBLIC | MethodAccessFlags::ACC_ABSTRACT)
+                }) {
+                    return Err(CheckError::InvalidInterfaceMethodFlags);
+                }
+            } else {
+                if methods_iter.any(|method| {
+                    let access_flags = JavaBeUtil::u8_slice_to_u16(method.access_flags);
+
+                    access_flags
+                        .flag_set(MethodAccessFlags::ACC_PUBLIC | MethodAccessFlags::ACC_PRIVATE)
+                }) {
+                    return Err(CheckError::InvalidInterfaceMethodFlags);
+                }
+            }
+        } else {
+            if methods_iter.any(|method| {
+                let access_flags = JavaBeUtil::u8_slice_to_u16(method.access_flags);
+
+                access_flags.flag_set(
+                    FieldAccessFlags::ACC_PUBLIC
+                        | FieldAccessFlags::ACC_PRIVATE
+                        | FieldAccessFlags::ACC_PROTECTED,
+                ) || access_flags
+                    .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PRIVATE)
+                    || access_flags
+                        .flag_set(FieldAccessFlags::ACC_PRIVATE | FieldAccessFlags::ACC_PROTECTED)
+                    || access_flags
+                        .flag_set(FieldAccessFlags::ACC_PUBLIC | FieldAccessFlags::ACC_PROTECTED)
+            }) {
+                return Err(CheckError::InvalidMethodFlags);
+            }
+        }
+
+        if methods_iter.any(|method| {
+            let access_flags = JavaBeUtil::u8_slice_to_u16(method.access_flags);
+
+            if access_flags.flag_set(MethodAccessFlags::ACC_ABSTRACT)
+                && (access_flags.flag_set(MethodAccessFlags::ACC_PRIVATE)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_STATIC)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_FINAL)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_SYNCHRONIZED)
+                    || access_flags.flag_set(MethodAccessFlags::ACC_NATIVE)
+                    || ({
+                        if (46u16..=60u16).contains(&self.state.major) {
+                            access_flags.flag_set(MethodAccessFlags::ACC_STRICT)
+                        } else {
+                            false
+                        }
+                    }))
+            {
+                true
+            } else {
+                false
+            }
+        }) {
+            return Err(CheckError::InvalidMethodFlags);
+        }
+
+        todo!()
+    }
 }
 
 struct ClassFileCheckerState {
     is_interface: bool,
     is_module: bool,
+    major: u16,
 }
 
-impl Default for ClassFileCheckerState {
-    fn default() -> Self {
+impl ClassFileCheckerState {
+    pub(crate) fn new(major: u16) -> Self {
         Self {
             is_interface: false,
             is_module: false,
+            major,
         }
     }
 }

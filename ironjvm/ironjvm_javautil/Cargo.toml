@@ -1,0 +1,9 @@
+[package]
+name = "ironjvm_javautil"
+authors = ["HTGAzureX1212."]
+version = "18.0.0"
+description = "Convenience utilities when working with Java class files."
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]

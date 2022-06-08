@@ -30,6 +30,8 @@ pub enum CheckError {
     InvalidFieldFlags,
     InvalidFlagsWithInterfaceFlag,
     InvalidInterfaceFieldFlags,
+    InvalidInterfaceMethodFlags,
+    InvalidMethodFlags,
     InvalidMinor { minor: u16 },
     NotOnlyModuleFlagSet,
     SuperClassIndexNotConstantClass,

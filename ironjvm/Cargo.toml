@@ -2,6 +2,7 @@
 members = [
     "ironjvm_cfck",
     "ironjvm_cfparser",
+    "ironjvm_javautil",
     "ironjvm_libjvm",
     "ironjvm_specimpl",
 ]
