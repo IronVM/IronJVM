@@ -22,7 +22,7 @@ pub mod attrinfo;
 pub mod cpinfo;
 pub mod flags;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct AttributeInfo<'clazz> {
     pub attribute_name_index: u16,
     pub attribute_length: u32,
@@ -64,7 +64,7 @@ pub struct FieldInfo<'clazz> {
     pub attributes: Vec<AttributeInfo<'clazz>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct MethodInfo<'clazz> {
     pub access_flags: u16,
     pub name_index: u16,

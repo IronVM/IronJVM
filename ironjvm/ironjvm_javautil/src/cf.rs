@@ -18,6 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+use std::str;
+
+use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::{ClassFile, MethodInfo};
 
 pub trait JavaCfUtil<'clazz> {
@@ -26,6 +29,27 @@ pub trait JavaCfUtil<'clazz> {
 
 impl<'clazz> JavaCfUtil<'clazz> for ClassFile<'clazz> {
     fn instance_initialization_methods(&'clazz self) -> Vec<MethodInfo<'clazz>> {
-        todo!()
+        self.methods
+            .iter()
+            .filter(|method| {
+                let name_index = method.name_index;
+                let Some(CpInfoType::ConstantUtf8 { bytes, .. }) = self.constant_pool
+                .get((name_index - 1) as usize)
+                .filter(|some| {
+                    let CpInfoType::ConstantUtf8 { .. } = some.info else {
+                        return false;
+                    };
+
+                    true
+                })
+                .map(|cp_info| cp_info.info.clone()) else {
+                    return false;
+                };
+
+                let name = unsafe { str::from_utf8_unchecked(bytes) };
+                name == "<init>"
+            })
+            .map(|method| method.clone())
+            .collect()
     }
 }

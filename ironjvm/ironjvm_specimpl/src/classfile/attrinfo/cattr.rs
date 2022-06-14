@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CodeAttributeExceptionTableEntry {
     pub start_pc: u16,
     pub end_pc: u16,

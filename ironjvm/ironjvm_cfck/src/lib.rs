@@ -398,13 +398,11 @@ impl<'clazz> ClassFileChecker<'clazz> {
                     || access_flags.flag_set(MethodAccessFlags::ACC_FINAL)
                     || access_flags.flag_set(MethodAccessFlags::ACC_SYNCHRONIZED)
                     || access_flags.flag_set(MethodAccessFlags::ACC_NATIVE)
-                    || ({
-                        if (46u16..=60u16).contains(&self.state.major) {
-                            access_flags.flag_set(MethodAccessFlags::ACC_STRICT)
-                        } else {
-                            false
-                        }
-                    }))
+                    || if (46u16..=60u16).contains(&self.state.major) {
+                        access_flags.flag_set(MethodAccessFlags::ACC_STRICT)
+                    } else {
+                        false
+                    })
             {
                 true
             } else {

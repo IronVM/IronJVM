@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ModuleExport<'clazz> {
     pub exports_index: u16,
     pub exports_flags: u16,
@@ -26,7 +26,7 @@ pub struct ModuleExport<'clazz> {
     pub exports_to_index: &'clazz [[u8; 2]],
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ModuleOpen<'clazz> {
     pub opens_index: u16,
     pub opens_flags: u16,
@@ -34,14 +34,14 @@ pub struct ModuleOpen<'clazz> {
     pub opens_to_index: &'clazz [[u8; 2]],
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ModuleProvide<'clazz> {
     pub provides_index: u16,
     pub provides_with_count: u16,
     pub provides_with_index: &'clazz [[u8; 2]],
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ModuleRequire {
     pub requires_index: u16,
     pub requires_flags: u16,

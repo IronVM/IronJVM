@@ -20,7 +20,7 @@
 
 use crate::classfile;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct RecordComponentInfo<'clazz> {
     pub name_index: u16,
     pub descriptor_index: u16,
