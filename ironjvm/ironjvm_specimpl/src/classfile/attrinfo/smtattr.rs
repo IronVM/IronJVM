@@ -29,28 +29,28 @@ pub enum StackMapFrame {
     },
     SameLocals1StackItemFrameExtended {
         frame_type: u8,
-        offset_delta: [u8; 2],
+        offset_delta: u16,
         stack: VerificationTypeInfo,
     },
     ChopFrame {
         frame_type: u8,
-        offset_delta: [u8; 2],
+        offset_delta: u16,
     },
     SameFrameExtended {
         frame_type: u8,
-        offset_delta: [u8; 2],
+        offset_delta: u16,
     },
     AppendFrame {
         frame_type: u8,
-        offset_delta: [u8; 2],
+        offset_delta: u16,
         locals: Vec<VerificationTypeInfo>,
     },
     FullFrame {
         frame_type: u8,
-        offset_delta: [u8; 2],
-        number_of_locals: [u8; 2],
+        offset_delta: u16,
+        number_of_locals: u16,
         locals: Vec<VerificationTypeInfo>,
-        number_of_stack_items: [u8; 2],
+        number_of_stack_items: u16,
         stack: Vec<VerificationTypeInfo>,
     },
 }
@@ -64,6 +64,6 @@ pub enum VerificationTypeInfo {
     LongVariableInfo { tag: u8 },
     NullVariableInfo { tag: u8 },
     UninitializedThisVariableInfo { tag: u8 },
-    ObjectVariableInfo { tag: u8, cpool_index: [u8; 2] },
-    UninitializedVariableInfo { tag: u8, offset: [u8; 2] },
+    ObjectVariableInfo { tag: u8, cpool_index: u16 },
+    UninitializedVariableInfo { tag: u8, offset: u16 },
 }

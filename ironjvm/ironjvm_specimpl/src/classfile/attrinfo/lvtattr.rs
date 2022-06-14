@@ -20,9 +20,9 @@
 
 #[derive(Debug)]
 pub struct LocalVariable {
-    pub start_pc: [u8; 2],
-    pub length: [u8; 2],
-    pub name_index: [u8; 2],
-    pub descriptor_index: [u8; 2],
-    pub index: [u8; 2],
+    pub start_pc: u16,
+    pub length: u16,
+    pub name_index: u16,
+    pub descriptor_index: u16,
+    pub index: u16,
 }

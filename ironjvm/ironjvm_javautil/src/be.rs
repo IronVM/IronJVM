@@ -19,7 +19,11 @@
  */
 
 pub trait JavaBeUtil {
-    fn u8_slice_to_u16(bytes: [u8; 2]) -> u16 {
-        u16::from_be_bytes(bytes)
+    fn to_u16(self) -> u16;
+}
+
+impl JavaBeUtil for [u8; 2] {
+    fn to_u16(self) -> u16 {
+        u16::from_be_bytes(self)
     }
 }

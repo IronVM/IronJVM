@@ -20,8 +20,8 @@
 
 #[derive(Debug)]
 pub struct InnerClass {
-    pub inner_class_info_index: [u8; 2],
-    pub outer_class_info_index: [u8; 2],
-    pub inner_name_index: [u8; 2],
-    pub inner_class_access_flags: [u8; 2],
+    pub inner_class_info_index: u16,
+    pub outer_class_info_index: u16,
+    pub inner_name_index: u16,
+    pub inner_class_access_flags: u16,
 }

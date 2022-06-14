@@ -20,8 +20,8 @@
 
 #[derive(Debug)]
 pub struct CodeAttributeExceptionTableEntry {
-    pub start_pc: [u8; 2],
-    pub end_pc: [u8; 2],
-    pub handler_pc: [u8; 2],
-    pub catch_type: [u8; 2],
+    pub start_pc: u16,
+    pub end_pc: u16,
+    pub handler_pc: u16,
+    pub catch_type: u16,
 }

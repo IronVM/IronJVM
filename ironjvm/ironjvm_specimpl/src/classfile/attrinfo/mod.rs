@@ -37,86 +37,86 @@ pub mod smtattr;
 #[derive(Debug)]
 pub enum AttributeInfoType<'clazz> {
     ConstantValueAttribute {
-        constantvalue_index: [u8; 2],
+        constantvalue_index: u16,
     },
     CodeAttribute {
-        max_stack: [u8; 2],
-        max_locals: [u8; 2],
+        max_stack: u16,
+        max_locals: u16,
         code_length: u32,
         code: &'clazz [u8],
-        exception_table_length: [u8; 2],
+        exception_table_length: u16,
         exception_table: Vec<cattr::CodeAttributeExceptionTableEntry>,
-        attributes_count: [u8; 2],
+        attributes_count: u16,
         attributes: Vec<AttributeInfo<'clazz>>,
     },
     StackMapTableAttribute {
-        number_of_entries: [u8; 2],
+        number_of_entries: u16,
         stack_map_table: Vec<smtattr::StackMapFrame>,
     },
     ExceptionsAttribute {
-        number_of_exceptions: [u8; 2],
+        number_of_exceptions: u16,
         exception_index_table: &'clazz [[u8; 2]],
     },
     InnerClassesAttribute {
-        number_of_classes: [u8; 2],
+        number_of_classes: u16,
         classes: Vec<icattr::InnerClass>,
     },
     EnclosingMethodAttribute {
-        class_index: [u8; 2],
-        method_index: [u8; 2],
+        class_index: u16,
+        method_index: u16,
     },
     SyntheticAttribute,
     SignatureAttribute {
-        signature_index: [u8; 2],
+        signature_index: u16,
     },
     SourceFileAttribute {
-        sourcefile_index: [u8; 2],
+        sourcefile_index: u16,
     },
     SourceDebugExtensionAttribute {
         debug_extension: &'clazz [u8],
     },
     LineNumberTableAttribute {
-        line_number_table_length: [u8; 2],
+        line_number_table_length: u16,
         line_number_table: Vec<lntattr::LineNumber>,
     },
     LocalVariableTableAttribute {
-        local_variable_table_length: [u8; 2],
+        local_variable_table_length: u16,
         local_variable_table: Vec<lvtattr::LocalVariable>,
     },
     LocalVariableTypeTableAttribute {
-        local_variable_type_table_length: [u8; 2],
+        local_variable_type_table_length: u16,
         local_variable_type_table: Vec<lvttattr::LocalVariableType>,
     },
     DeprecatedAttribute,
     RuntimeVisibleAnnotationsAttribute {
-        num_annotations: [u8; 2],
+        num_annotations: u16,
         annotations: Vec<rvanriaattr::Annotation>,
     },
     RuntimeInvisibleAnnotationsAttribute {
-        num_annotations: [u8; 2],
+        num_annotations: u16,
         annotations: Vec<rvanriaattr::Annotation>,
     },
     RuntimeVisibleParameterAnnotationsAttribute {
-        num_parameters: [u8; 2],
+        num_parameters: u16,
         parameter_annotations: Vec<rvpaattr::ParameterAnnotation>,
     },
     RuntimeInvisibleParameterAnnotationsAttribute {
-        num_parameters: [u8; 2],
+        num_parameters: u16,
         parameter_annotations: Vec<rvpaattr::ParameterAnnotation>,
     },
     RuntimeVisibleTypeAnnotationsAttribute {
-        num_annotations: [u8; 2],
+        num_annotations: u16,
         annotations: Vec<rvtnritaattr::TypeAnnotation>,
     },
     RuntimeInvisibleTypeAnnotationsAttribute {
-        num_annotations: [u8; 2],
+        num_annotations: u16,
         annotations: Vec<rvtnritaattr::TypeAnnotation>,
     },
     AnnotationDefaultAttribute {
         default_value: rvanriaattr::ElementValue,
     },
     BootstrapMethodsAttribute {
-        num_bootstrap_methods: [u8; 2],
+        num_bootstrap_methods: u16,
         bootstrap_methods: Vec<bmattr::BootstrapMethod<'clazz>>,
     },
     MethodParametersAttribute {
@@ -124,40 +124,40 @@ pub enum AttributeInfoType<'clazz> {
         parameters: Vec<mpattr::MethodParameter>,
     },
     ModuleAttribute {
-        module_name_index: [u8; 2],
-        module_flags: [u8; 2],
-        module_version_index: [u8; 2],
-        requires_count: [u8; 2],
+        module_name_index: u16,
+        module_flags: u16,
+        module_version_index: u16,
+        requires_count: u16,
         requires: Vec<mattr::ModuleRequire>,
-        exports_count: [u8; 2],
+        exports_count: u16,
         exports: Vec<mattr::ModuleExport<'clazz>>,
-        opens_count: [u8; 2],
+        opens_count: u16,
         opens: Vec<mattr::ModuleOpen<'clazz>>,
-        uses_count: [u8; 2],
+        uses_count: u16,
         uses_index: &'clazz [[u8; 2]],
-        provides_count: [u8; 2],
+        provides_count: u16,
         provides: Vec<mattr::ModuleProvide<'clazz>>,
     },
     ModulePackagesAttribute {
-        package_count: [u8; 2],
+        package_count: u16,
         package_index: &'clazz [[u8; 2]],
     },
     ModuleMainClassAttribute {
-        main_class_index: [u8; 2],
+        main_class_index: u16,
     },
     NestHostAttribute {
-        host_class_index: [u8; 2],
+        host_class_index: u16,
     },
     NestMembersAttribute {
-        number_of_classes: [u8; 2],
+        number_of_classes: u16,
         classes: &'clazz [[u8; 2]],
     },
     RecordAttribute {
-        components_count: [u8; 2],
+        components_count: u16,
         components: Vec<rattr::RecordComponentInfo<'clazz>>,
     },
     PermittedSubclassesAttribute {
-        number_of_classes: [u8; 2],
+        number_of_classes: u16,
         classes: &'clazz [[u8; 2]],
     },
 }

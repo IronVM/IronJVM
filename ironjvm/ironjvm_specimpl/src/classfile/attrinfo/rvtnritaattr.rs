@@ -25,8 +25,8 @@ pub struct TypeAnnotation {
     pub target_type: u8,
     pub target_info: TypeAnnotationTargetInfo,
     pub target_path: TypeAnnotationTypePath,
-    pub type_index: [u8; 2],
-    pub num_element_value_pairs: [u8; 2],
+    pub type_index: u16,
+    pub num_element_value_pairs: u16,
     pub element_value_pairs: Vec<rvanriaattr::ElementValuePair>,
 }
 
@@ -36,7 +36,7 @@ pub enum TypeAnnotationTargetInfo {
         type_parameter_index: u8,
     },
     SupertypeTarget {
-        supertype_index: [u8; 2],
+        supertype_index: u16,
     },
     TypeParameterBoundTarget {
         type_parameter_index: u8,
@@ -47,29 +47,29 @@ pub enum TypeAnnotationTargetInfo {
         formal_parameter_index: u8,
     },
     ThrowsTarget {
-        throws_type_index: [u8; 2],
+        throws_type_index: u16,
     },
     LocalVarTarget {
-        table_length: [u8; 2],
+        table_length: u16,
         table: Vec<TypeAnnotationLocalVarTargetTableEntry>,
     },
     CatchTarget {
-        catch_index: [u8; 2],
+        catch_index: u16,
     },
     OffsetTarget {
-        offset: [u8; 2],
+        offset: u16,
     },
     TypeArgumentTarget {
-        offset: [u8; 2],
+        offset: u16,
         type_argument_index: u8,
     },
 }
 
 #[derive(Debug)]
 pub struct TypeAnnotationLocalVarTargetTableEntry {
-    pub start_pc: [u8; 2],
-    pub length: [u8; 2],
-    pub index: [u8; 2],
+    pub start_pc: u16,
+    pub length: u16,
+    pub index: u16,
 }
 
 #[derive(Debug)]

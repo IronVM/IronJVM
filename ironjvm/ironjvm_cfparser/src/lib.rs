@@ -65,19 +65,19 @@ impl<'clazz> ClassFileParser<'clazz> {
         let minor_version = self.next_u2();
         let major_version = self.next_u2();
         let constant_pool_count = self.next_u2();
-        let constant_pool = self.parse_constant_pool(JavaBeUtil::u8_slice_to_u16(constant_pool_count))?;
+        let constant_pool = self.parse_constant_pool(constant_pool_count)?;
         let access_flags = self.next_u2();
         let this_class = self.next_u2();
         let super_class = self.next_u2();
         let interfaces_count = self.next_u2();
-        let interfaces = self.parse_interfaces(JavaBeUtil::u8_slice_to_u16(interfaces_count));
+        let interfaces = self.parse_interfaces(interfaces_count);
         let fields_count = self.next_u2();
-        let fields = self.parse_fields(JavaBeUtil::u8_slice_to_u16(fields_count), &constant_pool)?;
+        let fields = self.parse_fields(fields_count, &constant_pool)?;
         let methods_count = self.next_u2();
-        let methods = self.parse_methods(JavaBeUtil::u8_slice_to_u16(methods_count), &constant_pool)?;
+        let methods = self.parse_methods(methods_count, &constant_pool)?;
         let attributes_count = self.next_u2();
         let attributes =
-            self.parse_attributes(JavaBeUtil::u8_slice_to_u16(attributes_count), &constant_pool)?;
+            self.parse_attributes(attributes_count, &constant_pool)?;
 
         Ok(ClassFile {
             magic,
@@ -116,8 +116,8 @@ impl<'clazz> ClassFileParser<'clazz> {
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
-    fn next_u2(&mut self) -> [u8; 2] {
-        [self.next_u1(), self.next_u1()]
+    fn next_u2(&mut self) -> u16 {
+        [self.next_u1(), self.next_u1()].to_u16()
     }
 
     // Credit: code referenced from https://github.com/TapVM/Aftermath
@@ -153,7 +153,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     CpInfoType::ConstantUtf8 {
                         length,
-                        bytes: self.next_u1_many(JavaBeUtil::u8_slice_to_u16(length) as usize),
+                        bytes: self.next_u1_many(length as usize),
                     }
                 }
                 3 => CpInfoType::ConstantInteger {
@@ -245,7 +245,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 descriptor_index,
                 attributes_count,
                 attributes: self
-                    .parse_attributes(JavaBeUtil::u8_slice_to_u16(attributes_count), constant_pool)?,
+                    .parse_attributes(attributes_count, constant_pool)?,
             });
         }
 
@@ -263,7 +263,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let attribute_name_index = self.next_u2();
             let attribute_length = self.next_u4();
 
-            let opt = &constant_pool.get(JavaBeUtil::u8_slice_to_u16(attribute_name_index) as usize - 1);
+            let opt = &constant_pool.get(attribute_name_index as usize - 1);
 
             if opt.is_none() {
                 return Err(ParseError::InvalidConstantPoolIndex);
@@ -291,7 +291,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     let exception_table_length = self.next_u2();
                     let exception_table =
-                        self.parse_exception_table(JavaBeUtil::u8_slice_to_u16(exception_table_length))?;
+                        self.parse_exception_table(exception_table_length)?;
 
                     let attributes_count = self.next_u2();
 
@@ -304,16 +304,15 @@ impl<'clazz> ClassFileParser<'clazz> {
                         exception_table,
                         attributes_count,
                         attributes: self.parse_attributes(
-                            JavaBeUtil::u8_slice_to_u16(attributes_count),
+                            attributes_count,
                             constant_pool,
                         )?,
                     }
                 }
                 "StackMapTable" => {
                     let number_of_entries = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(number_of_entries);
-                    let mut stack_map_table = Vec::with_capacity(length as usize);
-                    while stack_map_table.len() < length as usize {
+                    let mut stack_map_table = Vec::with_capacity(number_of_entries as usize);
+                    while stack_map_table.len() < number_of_entries as usize {
                         stack_map_table.push(self.parse_stack_map_frame()?);
                     }
 
@@ -328,14 +327,13 @@ impl<'clazz> ClassFileParser<'clazz> {
                     AttributeInfoType::ExceptionsAttribute {
                         number_of_exceptions,
                         exception_index_table: self
-                            .next_u2_many(JavaBeUtil::u8_slice_to_u16(number_of_exceptions) as usize),
+                            .next_u2_many(number_of_exceptions as usize),
                     }
                 }
                 "InnerClasses" => {
                     let number_of_classes = self.next_u2();
-                    let no_of_classes = JavaBeUtil::u8_slice_to_u16(number_of_classes);
-                    let mut classes = Vec::with_capacity(no_of_classes as usize);
-                    while classes.len() < no_of_classes as usize {
+                    let mut classes = Vec::with_capacity(number_of_classes as usize);
+                    while classes.len() < number_of_classes as usize {
                         classes.push(InnerClass {
                             inner_class_info_index: self.next_u2(),
                             outer_class_info_index: self.next_u2(),
@@ -365,9 +363,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 },
                 "LineNumberTable" => {
                     let line_number_table_length = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(line_number_table_length);
-                    let mut line_number_table = Vec::with_capacity(length as usize);
-                    while line_number_table.len() < length as usize {
+                    let mut line_number_table = Vec::with_capacity(line_number_table_length as usize);
+                    while line_number_table.len() < line_number_table_length as usize {
                         line_number_table.push(LineNumber {
                             start_pc: self.next_u2(),
                             line_number: self.next_u2(),
@@ -381,9 +378,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "LocalVariableTable" => {
                     let local_variable_table_length = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(local_variable_table_length);
-                    let mut local_variable_table = Vec::with_capacity(length as usize);
-                    while local_variable_table.len() < length as usize {
+                    let mut local_variable_table = Vec::with_capacity(local_variable_table_length as usize);
+                    while local_variable_table.len() < local_variable_table_length as usize {
                         local_variable_table.push(LocalVariable {
                             start_pc: self.next_u2(),
                             length: self.next_u2(),
@@ -400,9 +396,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "LocalVariableTypeTable" => {
                     let local_variable_type_table_length = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(local_variable_type_table_length);
-                    let mut local_variable_type_table = Vec::with_capacity(length as usize);
-                    while local_variable_type_table.len() < length as usize {
+                    let mut local_variable_type_table = Vec::with_capacity(local_variable_type_table_length as usize);
+                    while local_variable_type_table.len() < local_variable_type_table_length as usize {
                         local_variable_type_table.push(LocalVariableType {
                             start_pc: self.next_u2(),
                             length: self.next_u2(),
@@ -420,9 +415,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 "Deprecated" => AttributeInfoType::DeprecatedAttribute,
                 "RuntimeVisibleAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let no_annotations = JavaBeUtil::u8_slice_to_u16(num_annotations);
-                    let mut annotations = Vec::with_capacity(no_annotations as usize);
-                    while annotations.len() < no_annotations as usize {
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    while annotations.len() < num_annotations as usize {
                         annotations.push(self.parse_annotation()?);
                     }
 
@@ -433,9 +427,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let no_annotations = JavaBeUtil::u8_slice_to_u16(num_annotations);
-                    let mut annotations = Vec::with_capacity(no_annotations as usize);
-                    while annotations.len() < no_annotations as usize {
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    while annotations.len() < num_annotations as usize {
                         annotations.push(self.parse_annotation()?);
                     }
 
@@ -446,9 +439,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeVisibleParameterAnnotations" => {
                     let num_parameters = self.next_u2();
-                    let no_parameters = JavaBeUtil::u8_slice_to_u16(num_parameters);
-                    let mut parameter_annotations = Vec::with_capacity(no_parameters as usize);
-                    while parameter_annotations.len() < no_parameters as usize {
+                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
+                    while parameter_annotations.len() < num_parameters as usize {
                         parameter_annotations.push(self.parse_parameter_annotation()?);
                     }
 
@@ -459,9 +451,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleParameterAnnotations" => {
                     let num_parameters = self.next_u2();
-                    let no_parameters = JavaBeUtil::u8_slice_to_u16(num_parameters);
-                    let mut parameter_annotations = Vec::with_capacity(no_parameters as usize);
-                    while parameter_annotations.len() < no_parameters as usize {
+                    let mut parameter_annotations = Vec::with_capacity(num_parameters as usize);
+                    while parameter_annotations.len() < num_parameters as usize {
                         parameter_annotations.push(self.parse_parameter_annotation()?);
                     }
 
@@ -472,9 +463,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeVisibleTypeAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let no_annotations = JavaBeUtil::u8_slice_to_u16(num_annotations);
-                    let mut annotations = Vec::with_capacity(no_annotations as usize);
-                    while annotations.len() < no_annotations as usize {
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    while annotations.len() < num_annotations as usize {
                         annotations.push(self.parse_type_annotation()?);
                     }
 
@@ -485,9 +475,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "RuntimeInvisibleTypeAnnotations" => {
                     let num_annotations = self.next_u2();
-                    let no_annotations = JavaBeUtil::u8_slice_to_u16(num_annotations);
-                    let mut annotations = Vec::with_capacity(no_annotations as usize);
-                    while annotations.len() < no_annotations as usize {
+                    let mut annotations = Vec::with_capacity(num_annotations as usize);
+                    while annotations.len() < num_annotations as usize {
                         annotations.push(self.parse_type_annotation()?);
                     }
 
@@ -501,16 +490,15 @@ impl<'clazz> ClassFileParser<'clazz> {
                 },
                 "BootstrapMethods" => {
                     let num_bootstrap_methods = self.next_u2();
-                    let no_bootstrap_methods = JavaBeUtil::u8_slice_to_u16(num_bootstrap_methods);
-                    let mut bootstrap_methods = Vec::with_capacity(no_bootstrap_methods as usize);
-                    while bootstrap_methods.len() < no_bootstrap_methods as usize {
+                    let mut bootstrap_methods = Vec::with_capacity(num_bootstrap_methods as usize);
+                    while bootstrap_methods.len() < num_bootstrap_methods as usize {
                         let num_bootstrap_arguments = self.next_u2();
 
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref: self.next_u2(),
                             num_bootstrap_arguments,
                             bootstrap_arguments: self.next_u2_many(
-                                JavaBeUtil::u8_slice_to_u16(num_bootstrap_arguments) as usize,
+                                num_bootstrap_arguments as usize,
                             ),
                         });
                     }
@@ -541,9 +529,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                     let module_version_index = self.next_u2();
 
                     let requires_count = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(requires_count);
-                    let mut requires = Vec::with_capacity(length as usize);
-                    while requires.len() < length as usize {
+                    let mut requires = Vec::with_capacity(requires_count as usize);
+                    while requires.len() < requires_count as usize {
                         requires.push(ModuleRequire {
                             requires_index: self.next_u2(),
                             requires_flags: self.next_u2(),
@@ -552,9 +539,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                     }
 
                     let exports_count = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(exports_count);
-                    let mut exports = Vec::with_capacity(length as usize);
-                    while exports.len() < length as usize {
+                    let mut exports = Vec::with_capacity(exports_count as usize);
+                    while exports.len() < exports_count as usize {
                         let exports_index = self.next_u2();
                         let exports_flags = self.next_u2();
                         let exports_to_count = self.next_u2();
@@ -564,14 +550,13 @@ impl<'clazz> ClassFileParser<'clazz> {
                             exports_flags,
                             exports_to_count,
                             exports_to_index: self
-                                .next_u2_many(JavaBeUtil::u8_slice_to_u16(exports_to_count) as usize),
+                                .next_u2_many(exports_to_count as usize),
                         });
                     }
 
                     let opens_count = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(opens_count);
-                    let mut opens = Vec::with_capacity(length as usize);
-                    while opens.len() < length as usize {
+                    let mut opens = Vec::with_capacity(opens_count as usize);
+                    while opens.len() < opens_count as usize {
                         let opens_index = self.next_u2();
                         let opens_flags = self.next_u2();
                         let opens_to_count = self.next_u2();
@@ -581,17 +566,16 @@ impl<'clazz> ClassFileParser<'clazz> {
                             opens_flags,
                             opens_to_count,
                             opens_to_index: self
-                                .next_u2_many(JavaBeUtil::u8_slice_to_u16(opens_to_count) as usize),
+                                .next_u2_many(opens_to_count as usize),
                         });
                     }
 
                     let uses_count = self.next_u2();
-                    let uses_index = self.next_u2_many(JavaBeUtil::u8_slice_to_u16(uses_count) as usize);
+                    let uses_index = self.next_u2_many(uses_count as usize);
 
                     let provides_count = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(provides_count);
-                    let mut provides = Vec::with_capacity(length as usize);
-                    while provides.len() < length as usize {
+                    let mut provides = Vec::with_capacity(provides_count as usize);
+                    while provides.len() < provides_count as usize {
                         let provides_index = self.next_u2();
                         let provides_with_count = self.next_u2();
 
@@ -599,7 +583,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                             provides_index,
                             provides_with_count,
                             provides_with_index: self
-                                .next_u2_many(JavaBeUtil::u8_slice_to_u16(provides_with_count) as usize),
+                                .next_u2_many(provides_with_count as usize),
                         });
                     }
 
@@ -625,7 +609,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                     AttributeInfoType::ModulePackagesAttribute {
                         package_count,
                         package_index: self
-                            .next_u2_many(JavaBeUtil::u8_slice_to_u16(package_count) as usize),
+                            .next_u2_many(package_count as usize),
                     }
                 }
                 "ModuleMainClass" => AttributeInfoType::ModuleMainClassAttribute {
@@ -640,14 +624,13 @@ impl<'clazz> ClassFileParser<'clazz> {
                     AttributeInfoType::NestMembersAttribute {
                         number_of_classes,
                         classes: self
-                            .next_u2_many(JavaBeUtil::u8_slice_to_u16(number_of_classes) as usize),
+                            .next_u2_many(number_of_classes as usize),
                     }
                 }
                 "Record" => {
                     let components_count = self.next_u2();
-                    let length = JavaBeUtil::u8_slice_to_u16(components_count);
-                    let mut components = Vec::with_capacity(length as usize);
-                    while components.len() < length as usize {
+                    let mut components = Vec::with_capacity(components_count as usize);
+                    while components.len() < components_count as usize {
                         let name_index = self.next_u2();
                         let descriptor_index = self.next_u2();
                         let attributes_count = self.next_u2();
@@ -657,7 +640,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                             descriptor_index,
                             attributes_count,
                             attributes: self.parse_attributes(
-                                JavaBeUtil::u8_slice_to_u16(attributes_count),
+                                attributes_count,
                                 constant_pool,
                             )?,
                         });
@@ -674,7 +657,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                     AttributeInfoType::PermittedSubclassesAttribute {
                         number_of_classes,
                         classes: self
-                            .next_u2_many(JavaBeUtil::u8_slice_to_u16(number_of_classes) as usize),
+                            .next_u2_many(number_of_classes as usize),
                     }
                 }
                 _ => unreachable!(),
@@ -763,16 +746,14 @@ impl<'clazz> ClassFileParser<'clazz> {
                 let offset_delta = self.next_u2();
 
                 let number_of_locals = self.next_u2();
-                let length = JavaBeUtil::u8_slice_to_u16(number_of_locals);
-                let mut locals = Vec::with_capacity(length as usize);
-                while locals.len() < length as usize {
+                let mut locals = Vec::with_capacity(number_of_locals as usize);
+                while locals.len() < number_of_locals as usize {
                     locals.push(self.parse_verification_type_info());
                 }
 
                 let number_of_stack_items = self.next_u2();
-                let length = JavaBeUtil::u8_slice_to_u16(number_of_stack_items);
-                let mut stack = Vec::with_capacity(length as usize);
-                while stack.len() < length as usize {
+                let mut stack = Vec::with_capacity(number_of_stack_items as usize);
+                while stack.len() < number_of_stack_items as usize {
                     stack.push(self.parse_verification_type_info());
                 }
 
@@ -816,9 +797,8 @@ impl<'clazz> ClassFileParser<'clazz> {
         let type_index = self.next_u2();
 
         let num_element_value_pairs = self.next_u2();
-        let length = JavaBeUtil::u8_slice_to_u16(num_element_value_pairs);
-        let mut element_value_pairs = Vec::with_capacity(length as usize);
-        while element_value_pairs.len() < length as usize {
+        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
+        while element_value_pairs.len() < num_element_value_pairs as usize {
             element_value_pairs.push(ElementValuePair {
                 element_name_index: self.next_u2(),
                 value: self.parse_element_value()?,
@@ -852,9 +832,8 @@ impl<'clazz> ClassFileParser<'clazz> {
             },
             '[' => {
                 let num_values = self.next_u2();
-                let length = JavaBeUtil::u8_slice_to_u16(num_values);
-                let mut values = Vec::with_capacity(length as usize);
-                while values.len() < length as usize {
+                let mut values = Vec::with_capacity(num_values as usize);
+                while values.len() < num_values as usize {
                     values.push(self.parse_element_value()?);
                 }
 
@@ -868,9 +847,8 @@ impl<'clazz> ClassFileParser<'clazz> {
 
     fn parse_parameter_annotation(&mut self) -> ParseResult<ParameterAnnotation> {
         let num_annotations = self.next_u2();
-        let length = JavaBeUtil::u8_slice_to_u16(num_annotations);
-        let mut annotations = Vec::with_capacity(length as usize);
-        while annotations.len() < length as usize {
+        let mut annotations = Vec::with_capacity(num_annotations as usize);
+        while annotations.len() < num_annotations as usize {
             annotations.push(self.parse_annotation()?);
         }
 
@@ -902,10 +880,8 @@ impl<'clazz> ClassFileParser<'clazz> {
             },
             0x40 | 0x41 => {
                 let table_length = self.next_u2();
-                let length = JavaBeUtil::u8_slice_to_u16(table_length);
-                let mut table = Vec::with_capacity(length as usize);
-
-                while table.len() < length as usize {
+                let mut table = Vec::with_capacity(table_length as usize);
+                while table.len() < table_length as usize {
                     table.push(TypeAnnotationLocalVarTargetTableEntry {
                         start_pc: self.next_u2(),
                         length: self.next_u2(),
@@ -944,9 +920,8 @@ impl<'clazz> ClassFileParser<'clazz> {
         let type_index = self.next_u2();
 
         let num_element_value_pairs = self.next_u2();
-        let length = JavaBeUtil::u8_slice_to_u16(num_element_value_pairs);
-        let mut element_value_pairs = Vec::with_capacity(length as usize);
-        while element_value_pairs.len() < length as usize {
+        let mut element_value_pairs = Vec::with_capacity(num_element_value_pairs as usize);
+        while element_value_pairs.len() < num_element_value_pairs as usize {
             element_value_pairs.push(ElementValuePair {
                 element_name_index: self.next_u2(),
                 value: self.parse_element_value()?,
@@ -976,7 +951,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let descriptor_index = self.next_u2();
             let attributes_count = self.next_u2();
             let attributes =
-                self.parse_attributes(JavaBeUtil::u8_slice_to_u16(attributes_count), constant_pool)?;
+                self.parse_attributes(attributes_count, constant_pool)?;
 
             vec.push(MethodInfo {
                 access_flags,

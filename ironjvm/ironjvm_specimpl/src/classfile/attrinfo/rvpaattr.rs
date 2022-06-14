@@ -22,6 +22,6 @@ use super::rvanriaattr;
 
 #[derive(Debug)]
 pub struct ParameterAnnotation {
-    pub num_annotations: [u8; 2],
+    pub num_annotations: u16,
     pub annotations: Vec<rvanriaattr::Annotation>,
 }
