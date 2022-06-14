@@ -76,8 +76,7 @@ impl<'clazz> ClassFileParser<'clazz> {
         let methods_count = self.next_u2();
         let methods = self.parse_methods(methods_count, &constant_pool)?;
         let attributes_count = self.next_u2();
-        let attributes =
-            self.parse_attributes(attributes_count, &constant_pool)?;
+        let attributes = self.parse_attributes(attributes_count, &constant_pool)?;
 
         Ok(ClassFile {
             magic,
@@ -244,8 +243,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 name_index,
                 descriptor_index,
                 attributes_count,
-                attributes: self
-                    .parse_attributes(attributes_count, constant_pool)?,
+                attributes: self.parse_attributes(attributes_count, constant_pool)?,
             });
         }
 
@@ -290,8 +288,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                     let code = self.next_u1_many(code_length as usize);
 
                     let exception_table_length = self.next_u2();
-                    let exception_table =
-                        self.parse_exception_table(exception_table_length)?;
+                    let exception_table = self.parse_exception_table(exception_table_length)?;
 
                     let attributes_count = self.next_u2();
 
@@ -303,10 +300,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                         exception_table_length,
                         exception_table,
                         attributes_count,
-                        attributes: self.parse_attributes(
-                            attributes_count,
-                            constant_pool,
-                        )?,
+                        attributes: self.parse_attributes(attributes_count, constant_pool)?,
                     }
                 }
                 "StackMapTable" => {
@@ -326,8 +320,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     AttributeInfoType::ExceptionsAttribute {
                         number_of_exceptions,
-                        exception_index_table: self
-                            .next_u2_many(number_of_exceptions as usize),
+                        exception_index_table: self.next_u2_many(number_of_exceptions as usize),
                     }
                 }
                 "InnerClasses" => {
@@ -363,7 +356,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 },
                 "LineNumberTable" => {
                     let line_number_table_length = self.next_u2();
-                    let mut line_number_table = Vec::with_capacity(line_number_table_length as usize);
+                    let mut line_number_table =
+                        Vec::with_capacity(line_number_table_length as usize);
                     while line_number_table.len() < line_number_table_length as usize {
                         line_number_table.push(LineNumber {
                             start_pc: self.next_u2(),
@@ -378,7 +372,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "LocalVariableTable" => {
                     let local_variable_table_length = self.next_u2();
-                    let mut local_variable_table = Vec::with_capacity(local_variable_table_length as usize);
+                    let mut local_variable_table =
+                        Vec::with_capacity(local_variable_table_length as usize);
                     while local_variable_table.len() < local_variable_table_length as usize {
                         local_variable_table.push(LocalVariable {
                             start_pc: self.next_u2(),
@@ -396,8 +391,11 @@ impl<'clazz> ClassFileParser<'clazz> {
                 }
                 "LocalVariableTypeTable" => {
                     let local_variable_type_table_length = self.next_u2();
-                    let mut local_variable_type_table = Vec::with_capacity(local_variable_type_table_length as usize);
-                    while local_variable_type_table.len() < local_variable_type_table_length as usize {
+                    let mut local_variable_type_table =
+                        Vec::with_capacity(local_variable_type_table_length as usize);
+                    while local_variable_type_table.len()
+                        < local_variable_type_table_length as usize
+                    {
                         local_variable_type_table.push(LocalVariableType {
                             start_pc: self.next_u2(),
                             length: self.next_u2(),
@@ -497,9 +495,8 @@ impl<'clazz> ClassFileParser<'clazz> {
                         bootstrap_methods.push(BootstrapMethod {
                             bootstrap_method_ref: self.next_u2(),
                             num_bootstrap_arguments,
-                            bootstrap_arguments: self.next_u2_many(
-                                num_bootstrap_arguments as usize,
-                            ),
+                            bootstrap_arguments: self
+                                .next_u2_many(num_bootstrap_arguments as usize),
                         });
                     }
 
@@ -549,8 +546,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                             exports_index,
                             exports_flags,
                             exports_to_count,
-                            exports_to_index: self
-                                .next_u2_many(exports_to_count as usize),
+                            exports_to_index: self.next_u2_many(exports_to_count as usize),
                         });
                     }
 
@@ -565,8 +561,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                             opens_index,
                             opens_flags,
                             opens_to_count,
-                            opens_to_index: self
-                                .next_u2_many(opens_to_count as usize),
+                            opens_to_index: self.next_u2_many(opens_to_count as usize),
                         });
                     }
 
@@ -582,8 +577,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                         provides.push(ModuleProvide {
                             provides_index,
                             provides_with_count,
-                            provides_with_index: self
-                                .next_u2_many(provides_with_count as usize),
+                            provides_with_index: self.next_u2_many(provides_with_count as usize),
                         });
                     }
 
@@ -608,8 +602,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     AttributeInfoType::ModulePackagesAttribute {
                         package_count,
-                        package_index: self
-                            .next_u2_many(package_count as usize),
+                        package_index: self.next_u2_many(package_count as usize),
                     }
                 }
                 "ModuleMainClass" => AttributeInfoType::ModuleMainClassAttribute {
@@ -623,8 +616,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     AttributeInfoType::NestMembersAttribute {
                         number_of_classes,
-                        classes: self
-                            .next_u2_many(number_of_classes as usize),
+                        classes: self.next_u2_many(number_of_classes as usize),
                     }
                 }
                 "Record" => {
@@ -639,10 +631,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                             name_index,
                             descriptor_index,
                             attributes_count,
-                            attributes: self.parse_attributes(
-                                attributes_count,
-                                constant_pool,
-                            )?,
+                            attributes: self.parse_attributes(attributes_count, constant_pool)?,
                         });
                     }
 
@@ -656,8 +645,7 @@ impl<'clazz> ClassFileParser<'clazz> {
 
                     AttributeInfoType::PermittedSubclassesAttribute {
                         number_of_classes,
-                        classes: self
-                            .next_u2_many(number_of_classes as usize),
+                        classes: self.next_u2_many(number_of_classes as usize),
                     }
                 }
                 _ => unreachable!(),
@@ -950,8 +938,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             let name_index = self.next_u2();
             let descriptor_index = self.next_u2();
             let attributes_count = self.next_u2();
-            let attributes =
-                self.parse_attributes(attributes_count, constant_pool)?;
+            let attributes = self.parse_attributes(attributes_count, constant_pool)?;
 
             vec.push(MethodInfo {
                 access_flags,

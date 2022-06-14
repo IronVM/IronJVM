@@ -281,10 +281,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_field_attributes(&self, field: &FieldInfo) -> bool {
-        assert_eq!(
-            field.attributes_count as usize,
-            field.attributes.len()
-        );
+        assert_eq!(field.attributes_count as usize, field.attributes.len());
 
         if field
             .attributes
