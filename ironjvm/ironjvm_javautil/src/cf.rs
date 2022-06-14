@@ -46,8 +46,7 @@ impl<'clazz> JavaCfUtil<'clazz> for ClassFile<'clazz> {
                     return false;
                 };
 
-                let name = unsafe { str::from_utf8_unchecked(bytes) };
-                name == "<init>"
+                unsafe { str::from_utf8_unchecked(bytes) } == "<init>"
             })
             .map(|method| method.clone())
             .collect()
