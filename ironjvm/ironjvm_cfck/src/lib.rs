@@ -57,6 +57,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
         self.check_super_class()?;
         self.check_interfaces()?;
         self.check_fields()?;
+        self.check_methods()?;
 
         todo!()
     }
