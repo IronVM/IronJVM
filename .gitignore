@@ -4,3 +4,5 @@
 **/Cargo.lock
 
 ironjvm/test_classes
+
+**/*/*.class
