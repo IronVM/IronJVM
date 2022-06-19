@@ -18,26 +18,57 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::slice::Iter;
+use std::slice::{Iter, SliceIndex};
 
-use crate::classfile::{ClassFile, MethodInfo};
+use crate::classfile::{ClassFile, CpInfo, MethodInfo};
 
 pub trait RetrievalApi<'clazz> {
-    fn constant_pool(&'clazz self) -> Iter<'clazz, MethodInfo<'clazz>> {
+    fn constant_pool(&'clazz self) -> Vec<CpInfo<'clazz>> {
         unimplemented!("`constant_pool` function not implemented for this element")
     }
 
-    fn methods(&'clazz self) -> Iter<'clazz, MethodInfo<'clazz>> {
+    fn methods_iter(&'clazz self) -> Iter<'clazz, MethodInfo<'clazz>> {
         unimplemented!("`methods` function not implemented for this element")
     }
 }
 
+pub trait RetrievalApiIterator<'clazz, T> {
+    fn find_where<F>(&self, f: F) -> Option<T>
+    where
+        F: Fn(&T) -> bool,
+    {
+        unimplemented!("`find_where` function not implemented for this element")
+    }
+}
+
+pub trait RetrievalApiVector<'clazz, T> {
+    fn element_at<I>(&self, index: I) -> Option<&I::Output>
+    where
+        I: SliceIndex<Self> {
+        unimplemented!("`get` function not implemented for this element")
+    }
+}
+
 impl<'clazz> RetrievalApi<'clazz> for ClassFile<'clazz> {
-    fn methods(&'clazz self) -> Iter<'clazz, MethodInfo<'clazz>> {
+    fn constant_pool(&'clazz self) -> Vec<CpInfo<'clazz>> {
+        self.constant_pool.clone()
+    }
+
+    fn methods_iter(&'clazz self) -> Iter<'clazz, MethodInfo<'clazz>> {
         self.methods.iter()
     }
 }
 
-impl<'clazz> RetrievalApi<'clazz> for Iter<'clazz, MethodInfo<'clazz>> {
+impl<'clazz> RetrievalApiIterator<'clazz, MethodInfo<'clazz>> for Iter<'clazz, MethodInfo<'clazz>> {
+    fn find_where<F>(&mut self, f: F) -> Option<MethodInfo<'clazz>> {
+        self.find(f).map(|t| t.clone())
+    }
+}
 
+impl<'clazz> RetrievalApiVector<'clazz, CpInfo<'clazz>> for Vec<CpInfo<'clazz>> {
+    fn element_at<I>(&self, index: I) -> Option<&I::Output>
+    where
+        I: SliceIndex<Self> {
+        self.get(index - 1)
+    }
 }

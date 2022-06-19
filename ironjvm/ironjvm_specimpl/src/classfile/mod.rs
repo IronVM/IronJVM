@@ -49,7 +49,7 @@ pub struct ClassFile<'clazz> {
     pub attributes: Vec<AttributeInfo<'clazz>>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct CpInfo<'clazz> {
     pub tag: u8,
     pub info: cpinfo::CpInfoType<'clazz>,
