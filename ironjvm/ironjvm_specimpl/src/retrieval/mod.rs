@@ -71,7 +71,8 @@ impl<'clazz> RetrievalApiIterator<'clazz, MethodInfo<'clazz>> for Iter<'clazz, M
 impl<'clazz> RetrievalApiVector<'clazz, CpInfo<'clazz>> for Vec<CpInfo<'clazz>> {
     fn element_at<I>(&self, index: I) -> Option<&I::Output>
     where
-        I: SliceIndex<Self> {
+        I: SliceIndex<Self>,
+    {
         self.get(index - 1)
     }
 }
