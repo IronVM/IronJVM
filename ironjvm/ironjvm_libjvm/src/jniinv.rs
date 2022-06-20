@@ -22,7 +22,12 @@
 
 use std::ffi::c_void;
 
-use jni_sys::{jint, JavaVM, JavaVMInitArgs, JNI_EVERSION, JNI_OK, JNI_VERSION_10};
+use jni_sys::jint;
+use jni_sys::JavaVM;
+use jni_sys::JavaVMInitArgs;
+use jni_sys::JNI_EVERSION;
+use jni_sys::JNI_OK;
+use jni_sys::JNI_VERSION_10;
 
 #[no_mangle]
 pub extern "C" fn JNI_CreateJavaVM(

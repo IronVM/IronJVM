@@ -18,9 +18,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use std::slice::{Iter, SliceIndex};
+use std::slice::Iter;
+use std::slice::SliceIndex;
 
-use crate::classfile::{ClassFile, CpInfo, MethodInfo};
+use crate::classfile::ClassFile;
+use crate::classfile::CpInfo;
+use crate::classfile::MethodInfo;
 
 pub trait RetrievalApi<'clazz> {
     fn constant_pool(&'clazz self) -> Vec<CpInfo<'clazz>> {

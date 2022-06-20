@@ -24,14 +24,19 @@
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
+use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::FieldInfo;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::flags::{
-    ClassAccessFlags, FieldAccessFlags, FlagsExt, MethodAccessFlags,
-};
-use ironjvm_specimpl::classfile::{ClassFile, FieldInfo};
+use ironjvm_specimpl::classfile::flags::ClassAccessFlags;
+use ironjvm_specimpl::classfile::flags::FieldAccessFlags;
+use ironjvm_specimpl::classfile::flags::FlagsExt;
+use ironjvm_specimpl::classfile::flags::MethodAccessFlags;
+use ironjvm_specimpl::retrieval::RetrievalApi;
+use ironjvm_specimpl::retrieval::RetrievalApiVector;
 
-use crate::error::{CheckError, CheckResult};
+use crate::error::CheckError;
+use crate::error::CheckResult;
 
 mod error;
 
@@ -127,7 +132,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     fn check_this_class(&self) -> CheckResult<()> {
         let this_class = self.classfile.this_class;
 
-        let Some(cp_info) = self.classfile.constant_pool.get((this_class - 1) as usize) else {
+        let Some(cp_info) = self.classfile.constant_pool().element_at(this_class as usize) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -146,7 +151,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Ok(());
         }
 
-        let Some(cp_info) = self.classfile.constant_pool.get((super_class - 1) as usize) else {
+        let Some(cp_info) = self.classfile.constant_pool().element_at(super_class as usize) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -166,8 +171,8 @@ impl<'clazz> ClassFileChecker<'clazz> {
         if self.classfile.interfaces.iter().any(|interface_index| {
             let cp_info_opt = self
                 .classfile
-                .constant_pool
-                .get((interface_index.to_u16() - 1) as usize);
+                .constant_pool()
+                .element_at(interface_index as usize);
 
             if cp_info_opt.is_none() {
                 return true;
