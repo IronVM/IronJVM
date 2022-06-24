@@ -23,5 +23,3 @@
 #![feature(arbitrary_enum_discriminant)]
 
 pub mod classfile;
-#[cfg(feature = "retrieval-api")]
-pub mod retrieval;

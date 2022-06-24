@@ -32,8 +32,6 @@ use ironjvm_specimpl::classfile::flags::ClassAccessFlags;
 use ironjvm_specimpl::classfile::flags::FieldAccessFlags;
 use ironjvm_specimpl::classfile::flags::FlagsExt;
 use ironjvm_specimpl::classfile::flags::MethodAccessFlags;
-use ironjvm_specimpl::retrieval::RetrievalApi;
-use ironjvm_specimpl::retrieval::RetrievalApiVector;
 
 use crate::error::CheckError;
 use crate::error::CheckResult;
@@ -172,7 +170,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
             let cp_info_opt = self
                 .classfile
                 .constant_pool()
-                .element_at(interface_index as usize);
+                .element_at(interface_index.to_u16() as usize);
 
             if cp_info_opt.is_none() {
                 return true;

@@ -8,7 +8,7 @@ license = "GPL-2.0"
 
 [dependencies]
 ironjvm_javautil = { path = "../ironjvm_javautil" }
-ironjvm_specimpl = { path = "../ironjvm_specimpl", feature = ["retrieval-api"] }
+ironjvm_specimpl = { path = "../ironjvm_specimpl" }
 
 byteorder = "1.4.3"
 
