@@ -130,7 +130,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     fn check_this_class(&self) -> CheckResult<()> {
         let this_class = self.classfile.this_class;
 
-        let Some(cp_info) = self.classfile.constant_pool().element_at(this_class as usize) else {
+        let Some(cp_info) = self.classfile.constant_pool.get(this_class as usize - 1) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -149,7 +149,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Ok(());
         }
 
-        let Some(cp_info) = self.classfile.constant_pool().element_at(super_class as usize) else {
+        let Some(cp_info) = self.classfile.constant_pool.get(super_class as usize - 1) else {
             return Err(CheckError::InvalidConstantPoolIndex);
         };
 
@@ -169,8 +169,8 @@ impl<'clazz> ClassFileChecker<'clazz> {
         if self.classfile.interfaces.iter().any(|interface_index| {
             let cp_info_opt = self
                 .classfile
-                .constant_pool()
-                .element_at(interface_index.to_u16() as usize);
+                .constant_pool
+                .get(interface_index.to_u16() as usize - 1);
 
             if cp_info_opt.is_none() {
                 return true;
