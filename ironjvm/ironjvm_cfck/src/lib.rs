@@ -24,14 +24,14 @@
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
-use ironjvm_specimpl::classfile::ClassFile;
-use ironjvm_specimpl::classfile::FieldInfo;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::flags::ClassAccessFlags;
 use ironjvm_specimpl::classfile::flags::FieldAccessFlags;
 use ironjvm_specimpl::classfile::flags::FlagsExt;
 use ironjvm_specimpl::classfile::flags::MethodAccessFlags;
+use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::FieldInfo;
 
 use crate::error::CheckError;
 use crate::error::CheckResult;
@@ -322,6 +322,11 @@ impl<'clazz> ClassFileChecker<'clazz> {
             str if str.starts_with("L") && str.ends_with(";") => true,
             str if str.starts_with("[") => {
                 let dimensions = str.matches("[").count();
+
+                if dimensions > 255 {
+                    return false;
+                }
+
                 let mut chars = str.chars();
                 if chars.advance_by(dimensions).is_err() {
                     return false;
