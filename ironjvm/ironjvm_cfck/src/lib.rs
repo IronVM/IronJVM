@@ -33,6 +33,7 @@ use ironjvm_specimpl::classfile::flags::FlagsExt;
 use ironjvm_specimpl::classfile::flags::MethodAccessFlags;
 use ironjvm_specimpl::classfile::ClassFile;
 use ironjvm_specimpl::classfile::FieldInfo;
+use ironjvm_specimpl::classfile::MethodInfo;
 
 use crate::error::CheckError;
 use crate::error::CheckResult;
@@ -452,6 +453,30 @@ impl<'clazz> ClassFileChecker<'clazz> {
         }
 
         todo!()
+    }
+
+    fn check_methods_get_clinit(&self) -> Option<MethodInfo> {
+        let mut methods_iter = self.classfile.methods.iter();
+        methods_iter.find(|method| {
+            let opt = &self.classfile.constant_pool.get(method.name_index as usize - 1);
+            if opt.is_none() {
+                return false;
+            }
+
+            let name_cp_info = opt.unwrap();
+            let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
+                unreachable!()
+            };
+
+            let string = unsafe {
+                // FIXME: JVM spec specifies these are modified UTF8
+                str::from_utf8_unchecked(bytes)
+            };
+
+            // FIXME: check method descriptor to be "V"
+            string == "<clinit>"
+        })
+        .map(|method| method.clone())
     }
 }
 
