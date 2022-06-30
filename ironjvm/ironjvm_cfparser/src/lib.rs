@@ -29,25 +29,34 @@ use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
 use ironjvm_specimpl::classfile::attrinfo::lntattr::LineNumber;
 use ironjvm_specimpl::classfile::attrinfo::lvtattr::LocalVariable;
 use ironjvm_specimpl::classfile::attrinfo::lvttattr::LocalVariableType;
-use ironjvm_specimpl::classfile::attrinfo::mattr::{
-    ModuleExport, ModuleOpen, ModuleProvide, ModuleRequire,
-};
+use ironjvm_specimpl::classfile::attrinfo::mattr::ModuleExport;
+use ironjvm_specimpl::classfile::attrinfo::mattr::ModuleOpen;
+use ironjvm_specimpl::classfile::attrinfo::mattr::ModuleProvide;
+use ironjvm_specimpl::classfile::attrinfo::mattr::ModuleRequire;
 use ironjvm_specimpl::classfile::attrinfo::mpattr::MethodParameter;
 use ironjvm_specimpl::classfile::attrinfo::rattr::RecordComponentInfo;
-use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::{
-    Annotation, ElementValue, ElementValuePair, ElementValueValue,
-};
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::Annotation;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::ElementValue;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::ElementValuePair;
+use ironjvm_specimpl::classfile::attrinfo::rvanriaattr::ElementValueValue;
 use ironjvm_specimpl::classfile::attrinfo::rvpaattr::ParameterAnnotation;
-use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::{
-    TypeAnnotation, TypeAnnotationLocalVarTargetTableEntry, TypeAnnotationTargetInfo,
-    TypeAnnotationTypePath, TypeAnnotationTypePathSegment,
-};
-use ironjvm_specimpl::classfile::attrinfo::smtattr::{StackMapFrame, VerificationTypeInfo};
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::TypeAnnotation;
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::TypeAnnotationLocalVarTargetTableEntry;
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::TypeAnnotationTargetInfo;
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::TypeAnnotationTypePath;
+use ironjvm_specimpl::classfile::attrinfo::rvtnritaattr::TypeAnnotationTypePathSegment;
+use ironjvm_specimpl::classfile::attrinfo::smtattr::StackMapFrame;
+use ironjvm_specimpl::classfile::attrinfo::smtattr::VerificationTypeInfo;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
-use ironjvm_specimpl::classfile::{AttributeInfo, ClassFile, CpInfo, FieldInfo, MethodInfo};
+use ironjvm_specimpl::classfile::AttributeInfo;
+use ironjvm_specimpl::classfile::ClassFile;
+use ironjvm_specimpl::classfile::CpInfo;
+use ironjvm_specimpl::classfile::FieldInfo;
+use ironjvm_specimpl::classfile::MethodInfo;
 
-use crate::error::{ParseError, ParseResult};
+use crate::error::ParseError;
+use crate::error::ParseResult;
 
 mod error;
 
