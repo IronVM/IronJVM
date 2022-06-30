@@ -21,6 +21,7 @@
 #![feature(iter_advance_by)]
 #![feature(let_else)]
 
+use std::collections::HashSet;
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
@@ -189,6 +190,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_fields(&self) -> CheckResult<()> {
+        self.check_field_duplicates()?;
         self.check_field_access_flags()?;
 
         let mut fields_iter = self.classfile.fields.iter();
@@ -232,6 +234,20 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
         if fields_iter.any(|field| !self.check_field_attributes(field)) {
             return Err(CheckError::InvalidFieldAttributes);
+        }
+
+        Ok(())
+    }
+
+    // FIXME: optimize this function
+    fn check_field_duplicates(&self) -> CheckResult<()> {
+        let mut set = HashSet::new();
+        let mut fields_iter = self.classfile.fields.iter();
+
+        while let Some(field) = fields_iter.next() {
+            if !set.insert(field) {
+                return Err(CheckError::DuplicatedField);
+            }
         }
 
         Ok(())
@@ -339,7 +355,22 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_methods(&self) -> CheckResult<()> {
+        self.check_method_duplicates()?;
         self.check_method_access_flags()?;
+
+        Ok(())
+    }
+
+    // FIXME: optimize this function
+    fn check_method_duplicates(&self) -> CheckResult<()> {
+        let mut set = HashSet::new();
+        let mut methods_iter = self.classfile.methods.iter();
+
+        while let Some(field) = methods_iter.next() {
+            if !set.insert(field) {
+                return Err(CheckError::DuplicatedMethod);
+            }
+        }
 
         Ok(())
     }

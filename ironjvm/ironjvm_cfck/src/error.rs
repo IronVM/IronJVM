@@ -21,6 +21,8 @@
 #[derive(Debug)]
 pub enum CheckError {
     AnnotationFlagWithoutInterfaceFlag,
+    DuplicatedField,
+    DuplicatedMethod,
     FieldNameIndexNotConstantUtf8,
     FinalAbstractFlagsSetSimultaneously,
     InterfaceFlagWithoutAbstractFlag,
