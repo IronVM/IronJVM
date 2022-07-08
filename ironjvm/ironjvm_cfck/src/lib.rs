@@ -21,7 +21,7 @@
 #![feature(iter_advance_by)]
 #![feature(let_else)]
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
@@ -242,12 +242,17 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
     // FIXME: optimize this function
     fn check_field_duplicates(&self) -> CheckResult<()> {
-        let mut set = HashSet::new();
+        let mut set = BTreeSet::new();
         let mut fields_iter = self.classfile.fields.iter();
 
         while let Some(field) = fields_iter.next() {
-            if !set.insert(field) {
-                return Err(CheckError::DuplicatedField);
+            let opt = self.classfile.constant_pool.get(field.name_index as usize - 1);
+            if let Some(name) = opt {
+                if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
+                    if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
+                        return Err(CheckError::DuplicatedField);
+                    }
+                }
             }
         }
 
@@ -364,12 +369,17 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
     // FIXME: optimize this function
     fn check_method_duplicates(&self) -> CheckResult<()> {
-        let mut set = HashSet::new();
-        let mut methods_iter = self.classfile.methods.iter();
+        let mut set = BTreeSet::new();
+        let mut methods_iter = self.classfile.fields.iter();
 
-        while let Some(field) = methods_iter.next() {
-            if !set.insert(field) {
-                return Err(CheckError::DuplicatedMethod);
+        while let Some(method) = methods_iter.next() {
+            let opt = self.classfile.constant_pool.get(method.name_index as usize - 1);
+            if let Some(name) = opt {
+                if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
+                    if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
+                        return Err(CheckError::DuplicatedMethod);
+                    }
+                }
             }
         }
 
