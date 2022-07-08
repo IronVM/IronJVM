@@ -25,6 +25,7 @@ use std::collections::BTreeSet;
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
+use ironjvm_javautil::jstr::JStr;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
 use ironjvm_specimpl::classfile::flags::ClassAccessFlags;
@@ -228,7 +229,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 return false;
             };
 
-            !self.check_field_descriptor(unsafe { str::from_utf8_unchecked(bytes) })
+            !self.check_field_descriptor(unsafe { JStr::from_jutf8_unchecked(bytes) })
         }) {
             return Err(CheckError::InvalidFieldDescriptor);
         }
@@ -252,7 +253,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 .get(field.name_index as usize - 1);
             if let Some(name) = opt {
                 if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
-                    if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
+                    if !set.insert(unsafe { JStr::from_jutf8_unchecked(bytes) }) {
                         return Err(CheckError::DuplicatedField);
                     }
                 }
@@ -341,8 +342,8 @@ impl<'clazz> ClassFileChecker<'clazz> {
         true
     }
 
-    fn check_field_descriptor(&self, descriptor: &str) -> bool {
-        match descriptor {
+    fn check_field_descriptor(&self, descriptor: &JStr) -> bool {
+        match **descriptor {
             "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" => true,
             str if str.starts_with("L") && str.ends_with(";") => true,
             str if str.starts_with("[") => {
@@ -382,7 +383,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 .get(method.name_index as usize - 1);
             if let Some(name) = opt {
                 if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
-                    if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
+                    if !set.insert(unsafe { JStr::from_jutf8_unchecked(bytes) }) {
                         return Err(CheckError::DuplicatedMethod);
                     }
                 }
@@ -489,12 +490,11 @@ impl<'clazz> ClassFileChecker<'clazz> {
             };
 
                 let string = unsafe {
-                    // FIXME: JVM spec specifies these are modified UTF8
-                    str::from_utf8_unchecked(bytes)
+                    JStr::from_jutf8_unchecked(bytes)
                 };
 
                 // FIXME: check method descriptor to be "V"
-                string == "<clinit>"
+                **string == "<clinit>"
             })
             .map(|method| method.clone())
     }

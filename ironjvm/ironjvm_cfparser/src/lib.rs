@@ -23,6 +23,7 @@
 use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
+use ironjvm_javautil::jstr::JStr;
 use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
 use ironjvm_specimpl::classfile::attrinfo::cattr::CodeAttributeExceptionTableEntry;
 use ironjvm_specimpl::classfile::attrinfo::icattr::InnerClass;
@@ -282,10 +283,9 @@ impl<'clazz> ClassFileParser<'clazz> {
             };
 
             let string = unsafe {
-                // FIXME: JVM spec specifies these are modified UTF8
-                str::from_utf8_unchecked(bytes)
+                JStr::from_jutf8_unchecked(bytes)
             };
-            let info = match string {
+            let info = match **string {
                 "ConstantValue" => AttributeInfoType::ConstantValueAttribute {
                     constantvalue_index: self.next_u2(),
                 },
