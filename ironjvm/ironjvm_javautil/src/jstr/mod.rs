@@ -25,14 +25,12 @@ use std::borrow::BorrowMut;
 use std::borrow::Cow;
 use std::borrow::ToOwned;
 use std::char;
-use std::cmp::Ordering;
 use std::fmt;
 use std::fmt::Write;
 use std::iter::FromIterator;
 use std::mem::size_of;
 use std::ops;
 use std::ops::Deref;
-use std::ops::DerefMut;
 use std::str;
 
 use crate::jstr::error::JUtf8Error;
@@ -401,7 +399,7 @@ impl JString {
 
     pub fn push(&mut self, ch: char) {
         let mut buf = [0; 6];
-        let size = encode_utf8_char(ch, &mut buf);
+        let size = encode_jutf8_char(ch, &mut buf);
         self.buf.extend_from_slice(&buf[..size]);
     }
 }
@@ -753,7 +751,7 @@ impl<'a> Extend<&'a str> for JString {
     }
 }
 
-fn encode_mutf8_char(ch: char, buf: &mut [u8]) -> usize {
+fn encode_jutf8_char(ch: char, buf: &mut [u8]) -> usize {
     let ch = ch as u32;
     match ch {
         0x01..=0x7F => {
