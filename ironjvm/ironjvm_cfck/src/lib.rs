@@ -246,7 +246,10 @@ impl<'clazz> ClassFileChecker<'clazz> {
         let mut fields_iter = self.classfile.fields.iter();
 
         while let Some(field) = fields_iter.next() {
-            let opt = self.classfile.constant_pool.get(field.name_index as usize - 1);
+            let opt = self
+                .classfile
+                .constant_pool
+                .get(field.name_index as usize - 1);
             if let Some(name) = opt {
                 if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
                     if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
@@ -373,7 +376,10 @@ impl<'clazz> ClassFileChecker<'clazz> {
         let mut methods_iter = self.classfile.fields.iter();
 
         while let Some(method) = methods_iter.next() {
-            let opt = self.classfile.constant_pool.get(method.name_index as usize - 1);
+            let opt = self
+                .classfile
+                .constant_pool
+                .get(method.name_index as usize - 1);
             if let Some(name) = opt {
                 if let CpInfoType::ConstantUtf8 { bytes, .. } = name.info {
                     if !set.insert(unsafe { str::from_utf8_unchecked(bytes) }) {
@@ -467,26 +473,30 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
     fn check_methods_get_clinit(&self) -> Option<MethodInfo> {
         let mut methods_iter = self.classfile.methods.iter();
-        methods_iter.find(|method| {
-            let opt = &self.classfile.constant_pool.get(method.name_index as usize - 1);
-            if opt.is_none() {
-                return false;
-            }
+        methods_iter
+            .find(|method| {
+                let opt = &self
+                    .classfile
+                    .constant_pool
+                    .get(method.name_index as usize - 1);
+                if opt.is_none() {
+                    return false;
+                }
 
-            let name_cp_info = opt.unwrap();
-            let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
+                let name_cp_info = opt.unwrap();
+                let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
                 unreachable!()
             };
 
-            let string = unsafe {
-                // FIXME: JVM spec specifies these are modified UTF8
-                str::from_utf8_unchecked(bytes)
-            };
+                let string = unsafe {
+                    // FIXME: JVM spec specifies these are modified UTF8
+                    str::from_utf8_unchecked(bytes)
+                };
 
-            // FIXME: check method descriptor to be "V"
-            string == "<clinit>"
-        })
-        .map(|method| method.clone())
+                // FIXME: check method descriptor to be "V"
+                string == "<clinit>"
+            })
+            .map(|method| method.clone())
     }
 }
 
