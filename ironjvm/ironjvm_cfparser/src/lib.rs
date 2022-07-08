@@ -282,9 +282,7 @@ impl<'clazz> ClassFileParser<'clazz> {
                 unreachable!()
             };
 
-            let string = unsafe {
-                JStr::from_jutf8_unchecked(bytes)
-            };
+            let string = unsafe { JStr::from_jutf8_unchecked(bytes) };
             let info = match **string {
                 "ConstantValue" => AttributeInfoType::ConstantValueAttribute {
                     constantvalue_index: self.next_u2(),

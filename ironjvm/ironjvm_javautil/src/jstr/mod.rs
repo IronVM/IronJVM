@@ -86,7 +86,9 @@ fn validate_jstr(v: &[u8]) -> bool {
                 }
                 3 => {
                     // three byte case: U+0800 and above
-                    if v[i + 1] & 0b1100_0000 != 0b1000_0000 || v[i + 2] & 0b1100_0000 != 0b1000_0000 {
+                    if v[i + 1] & 0b1100_0000 != 0b1000_0000
+                        || v[i + 2] & 0b1100_0000 != 0b1000_0000
+                    {
                         return false;
                     }
                     // overlong encodings are not allowed
@@ -99,7 +101,10 @@ fn validate_jstr(v: &[u8]) -> bool {
             }
         } else {
             // ASCII case: U+0001 to 0+007F
-            if !CONSTANTS_LARGE_ENOUGH || align_offset == usize::MAX || align_offset.wrapping_sub(i) % block_size != 0 {
+            if !CONSTANTS_LARGE_ENOUGH
+                || align_offset == usize::MAX
+                || align_offset.wrapping_sub(i) % block_size != 0
+            {
                 // probably unaligned
                 if b1 == 0 {
                     return false;
@@ -149,7 +154,6 @@ impl JStr {
             Err(JUtf8Error)
         }
     }
-
 
     #[must_use]
     pub const unsafe fn from_jutf8_unchecked(v: &[u8]) -> &Self {
@@ -234,7 +238,10 @@ impl ops::Index<ops::Range<usize>> for JStr {
 
     #[inline]
     fn index(&self, index: ops::Range<usize>) -> &JStr {
-        if index.start <= index.end && self.is_char_boundary(index.start) && self.is_char_boundary(index.end) {
+        if index.start <= index.end
+            && self.is_char_boundary(index.start)
+            && self.is_char_boundary(index.end)
+        {
             // SAFETY: This is safe because the underlying buffer is guaranteed to be valid.
             unsafe { JStr::from_jutf8_unchecked(self.inner.get_unchecked(index)) }
         } else {
@@ -622,14 +629,20 @@ unsafe fn decode_jutf8_char(v: &[u8]) -> (usize, Result<char, u32>) {
     }
 
     if v[0] == 0b1110_1101 {
-        if v.len() >= 6 && v[1] & 0b1111_0000 == 0b1010_0000 && v[3] == 0b1110_1101 && v[4] & 0b1111_0000 == 0b1011_0000
+        if v.len() >= 6
+            && v[1] & 0b1111_0000 == 0b1010_0000
+            && v[3] == 0b1110_1101
+            && v[4] & 0b1111_0000 == 0b1011_0000
         {
             // six byte case (paired surrogate)
             let c2 = u32::from(v[1] & 0b0000_1111) << 16;
             let c3 = u32::from(v[2] & 0b0011_1111) << 10;
             let c5 = u32::from(v[4] & 0b0000_1111) << 6;
             let c6 = u32::from(v[5] & 0b0011_1111);
-            return (6, Ok(char::from_u32_unchecked(0x10000 + (c2 | c3 | c5 | c6))));
+            return (
+                6,
+                Ok(char::from_u32_unchecked(0x10000 + (c2 | c3 | c5 | c6))),
+            );
         }
 
         // unpaired surrogates
@@ -668,13 +681,19 @@ unsafe fn decode_jutf8_char_reversed(v: &[u8]) -> (usize, Result<char, u32>) {
             let b4 = v[v.len() - 4];
             let b5 = v[v.len() - 5];
             let b6 = v[v.len() - 6];
-            if b2 & 0b1111_0000 == 0b1011_0000 && b5 & 0b1111_0000 == 0b1010_0000 && b6 == 0b1110_1101 {
+            if b2 & 0b1111_0000 == 0b1011_0000
+                && b5 & 0b1111_0000 == 0b1010_0000
+                && b6 == 0b1110_1101
+            {
                 // six byte case
                 let c2 = u32::from(b5 & 0b0000_1111) << 16;
                 let c3 = u32::from(b4 & 0b0011_1111) << 10;
                 let c5 = u32::from(b2 & 0b0000_1111) << 6;
                 let c6 = u32::from(b1 & 0b0011_1111);
-                return (6, Ok(char::from_u32_unchecked(0x10000 + (c2 | c3 | c5 | c6))));
+                return (
+                    6,
+                    Ok(char::from_u32_unchecked(0x10000 + (c2 | c3 | c5 | c6))),
+                );
             }
         }
         // unpaired surrogates
@@ -708,8 +727,8 @@ impl From<&str> for JString {
 
 impl FromIterator<char> for JString {
     fn from_iter<I>(iter: I) -> JString
-        where
-            I: IntoIterator<Item = char>,
+    where
+        I: IntoIterator<Item = char>,
     {
         let mut buf = JString::new();
         buf.extend(iter);

@@ -489,9 +489,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 unreachable!()
             };
 
-                let string = unsafe {
-                    JStr::from_jutf8_unchecked(bytes)
-                };
+                let string = unsafe { JStr::from_jutf8_unchecked(bytes) };
 
                 // FIXME: check method descriptor to be "V"
                 **string == "<clinit>"
