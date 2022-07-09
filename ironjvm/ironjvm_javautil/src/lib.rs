@@ -19,4 +19,5 @@
  */
 
 pub mod be;
+pub mod descriptor;
 pub mod jstr;
