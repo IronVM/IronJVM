@@ -24,6 +24,7 @@
 use std::collections::BTreeSet;
 
 use ironjvm_javautil::be::JavaBeUtil;
+use ironjvm_javautil::descriptor::method::{MethodDescriptor, ReturnDescriptor};
 use ironjvm_javautil::descriptor::TypeDescriptor;
 use ironjvm_javautil::jstr::JStr;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
@@ -451,6 +452,8 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Err(CheckError::InvalidMethodFlags);
         }
 
+        let _ = self.check_methods_get_clinit();
+
         todo!()
     }
 
@@ -468,13 +471,31 @@ impl<'clazz> ClassFileChecker<'clazz> {
 
                 let name_cp_info = opt.unwrap();
                 let CpInfoType::ConstantUtf8 { bytes, .. } = &name_cp_info.info else {
-                unreachable!()
-            };
-
+                    unreachable!()
+                };
                 let string = unsafe { JStr::from_jutf8_unchecked(bytes) };
 
-                // FIXME: check method descriptor to be "V"
+                let opt = &self
+                    .classfile
+                    .constant_pool
+                    .get(method.descriptor_index as usize - 1);
+                if opt.is_none() {
+                    return false;
+                }
+
+                let descriptor_cp_info = opt.unwrap();
+                let CpInfoType::ConstantUtf8 { bytes, .. } = &descriptor_cp_info.info else {
+                    unreachable!()
+                };
+                let descriptor_jstr = unsafe { JStr::from_jutf8_unchecked(bytes) };
+                let res = MethodDescriptor::from_jstr(descriptor_jstr);
+                if res.is_err() {
+                    return false;
+                }
+                let descriptor = res.unwrap();
+
                 string.to_str().unwrap() == "<clinit>"
+                    && descriptor.return_type() == ReturnDescriptor::VoidDescriptor
             })
             .map(|method| method.clone())
     }

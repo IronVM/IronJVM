@@ -27,7 +27,7 @@ pub mod error;
 pub mod field;
 pub mod method;
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum BaseType<'a> {
     Boolean,
     Byte,
@@ -40,6 +40,7 @@ pub enum BaseType<'a> {
     Object(&'a JStr),
 }
 
+#[derive(Eq, PartialEq)]
 pub struct TypeDescriptor<'a> {
     pub dimensions: u8,
     pub r#type: BaseType<'a>,
