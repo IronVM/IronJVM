@@ -143,7 +143,7 @@ pub struct JStr {
 }
 
 impl JStr {
-    pub fn from_utf8(v: &[u8]) -> Result<&Self, JUtf8Error> {
+    pub fn from_jutf8(v: &[u8]) -> Result<&Self, JUtf8Error> {
         if validate_jstr(v) {
             // SAFETY: This is safe because the byte slice is guaranteed to be valid.
             Ok(unsafe { JStr::from_jutf8_unchecked(v) })
