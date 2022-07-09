@@ -18,19 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use crate::descriptor::BaseType;
-use crate::jstr::JString;
+use crate::descriptor::TypeDescriptor;
 
-#[derive(Clone)]
-pub enum FieldType<'a> {
-    ArrayType {
-        dimensions: u8,
-        field_type: &'a FieldType<'a>,
-    },
-    BaseType(BaseType),
-    ObjectType {
-        class_name: JString,
-    },
-}
-
-pub type FieldDescriptor<'a> = FieldType<'a>;
+pub type FieldDescriptor<'a> = TypeDescriptor<'a>;

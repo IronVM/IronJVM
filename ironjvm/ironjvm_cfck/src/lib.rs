@@ -24,6 +24,7 @@
 use std::collections::BTreeSet;
 
 use ironjvm_javautil::be::JavaBeUtil;
+use ironjvm_javautil::descriptor::TypeDescriptor;
 use ironjvm_javautil::jstr::JStr;
 use ironjvm_specimpl::classfile::attrinfo::AttributeInfoType;
 use ironjvm_specimpl::classfile::cpinfo::CpInfoType;
@@ -342,27 +343,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_field_descriptor(&self, descriptor: &JStr) -> bool {
-        match descriptor.to_str().unwrap() {
-            "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" => true,
-            str if str.starts_with("L") && str.ends_with(";") => true,
-            str if str.starts_with("[") => {
-                let dimensions = str.matches("[").count();
-
-                if dimensions > 255 {
-                    return false;
-                }
-
-                let mut chars = str.chars();
-                if chars.advance_by(dimensions).is_err() {
-                    return false;
-                }
-
-                self.check_field_descriptor(unsafe {
-                    JStr::from_jutf8_unchecked(chars.as_str().as_bytes())
-                })
-            }
-            _ => false,
-        }
+        TypeDescriptor::from_jstr(descriptor).is_ok()
     }
 
     fn check_methods(&self) -> CheckResult<()> {

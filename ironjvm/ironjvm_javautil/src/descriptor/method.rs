@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-use crate::descriptor::field::FieldType;
+use crate::descriptor::TypeDescriptor;
 
 pub struct MethodDescriptor<'a> {
     pub length: u8,
@@ -27,8 +27,8 @@ pub struct MethodDescriptor<'a> {
 }
 
 pub enum ReturnDescriptor<'a> {
-    FieldType(FieldType<'a>),
+    FieldType(TypeDescriptor<'a>),
     VoidDescriptor,
 }
 
-pub type ParameterDescriptor<'a> = FieldType<'a>;
+pub type ParameterDescriptor<'a> = TypeDescriptor<'a>;

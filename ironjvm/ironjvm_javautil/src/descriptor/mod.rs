@@ -18,11 +18,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// Credit: code referenced from https://gitlab.com/frozo/noak/
+
+use crate::descriptor::error::InvalidDescriptorError;
+use crate::jstr::JStr;
+
+pub mod error;
 pub mod field;
 pub mod method;
 
 #[derive(Clone)]
-pub enum BaseType {
+pub enum BaseType<'a> {
     Boolean,
     Byte,
     Char,
@@ -31,4 +37,59 @@ pub enum BaseType {
     Int,
     Long,
     Short,
+    Object(&'a JStr),
+}
+
+pub struct TypeDescriptor<'a> {
+    pub dimensions: u8,
+    pub r#type: BaseType<'a>,
+}
+
+impl<'a> TypeDescriptor<'a> {
+    pub fn from_jstr(input: &'a JStr) -> Result<Self, InvalidDescriptorError> {
+        let mut chars = input.chars_lossy().enumerate();
+        let mut dimensions = 0u8;
+
+        while let Some((index, char)) = chars.next() {
+            if char == '[' {
+                dimensions = if let Some(dimensions) = dimensions.checked_add(1) {
+                    dimensions
+                } else {
+                    break;
+                }
+            } else {
+                let r#type = match char {
+                    'Z' => BaseType::Boolean,
+                    'B' => BaseType::Byte,
+                    'C' => BaseType::Char,
+                    'D' => BaseType::Double,
+                    'F' => BaseType::Float,
+                    'I' => BaseType::Int,
+                    'J' => BaseType::Long,
+                    'S' => BaseType::Short,
+                    'L' => {
+                        if !chars.any(|(_, char)| char == ';') {
+                            break;
+                        }
+
+                        let name = &input[index + 1..input.len() - 1];
+                        if name.is_empty() {
+                            break;
+                        }
+
+                        BaseType::Object(name)
+                    }
+                    _ => break,
+                };
+
+                if chars.next().is_some() {
+                    break;
+                }
+
+                return Ok(Self { dimensions, r#type });
+            }
+        }
+
+        Err(InvalidDescriptorError)
+    }
 }
