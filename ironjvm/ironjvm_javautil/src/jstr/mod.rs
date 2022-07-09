@@ -21,7 +21,6 @@
 // Credit: code referenced from https://gitlab.com/frozo/noak/
 
 use std::borrow::Borrow;
-use std::borrow::BorrowMut;
 use std::borrow::Cow;
 use std::borrow::ToOwned;
 use std::char;
@@ -418,12 +417,6 @@ impl Borrow<JStr> for JString {
     #[inline]
     fn borrow(&self) -> &JStr {
         &**self
-    }
-}
-
-impl BorrowMut<JStr> for JString {
-    fn borrow_mut(&mut self) -> &mut JStr {
-        &mut *self
     }
 }
 
