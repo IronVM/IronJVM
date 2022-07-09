@@ -22,7 +22,6 @@
 #![feature(let_else)]
 
 use std::collections::BTreeSet;
-use std::str;
 
 use ironjvm_javautil::be::JavaBeUtil;
 use ironjvm_javautil::jstr::JStr;
@@ -343,7 +342,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
     }
 
     fn check_field_descriptor(&self, descriptor: &JStr) -> bool {
-        match **descriptor {
+        match descriptor.to_str().unwrap() {
             "B" | "C" | "D" | "F" | "I" | "J" | "S" | "Z" => true,
             str if str.starts_with("L") && str.ends_with(";") => true,
             str if str.starts_with("[") => {
@@ -358,7 +357,9 @@ impl<'clazz> ClassFileChecker<'clazz> {
                     return false;
                 }
 
-                self.check_field_descriptor(chars.as_str())
+                self.check_field_descriptor(unsafe {
+                    JStr::from_jutf8_unchecked(chars.as_str().as_bytes())
+                })
             }
             _ => false,
         }
@@ -492,7 +493,7 @@ impl<'clazz> ClassFileChecker<'clazz> {
                 let string = unsafe { JStr::from_jutf8_unchecked(bytes) };
 
                 // FIXME: check method descriptor to be "V"
-                **string == "<clinit>"
+                string.to_str().unwrap() == "<clinit>"
             })
             .map(|method| method.clone())
     }

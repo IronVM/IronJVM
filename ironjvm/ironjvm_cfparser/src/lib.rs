@@ -20,8 +20,6 @@
 
 #![feature(let_else)]
 
-use std::str;
-
 use ironjvm_javautil::be::JavaBeUtil;
 use ironjvm_javautil::jstr::JStr;
 use ironjvm_specimpl::classfile::attrinfo::bmattr::BootstrapMethod;
@@ -283,7 +281,7 @@ impl<'clazz> ClassFileParser<'clazz> {
             };
 
             let string = unsafe { JStr::from_jutf8_unchecked(bytes) };
-            let info = match **string {
+            let info = match string.to_str().unwrap() {
                 "ConstantValue" => AttributeInfoType::ConstantValueAttribute {
                     constantvalue_index: self.next_u2(),
                 },
