@@ -21,6 +21,7 @@
 #[derive(Debug)]
 pub enum CheckError {
     AnnotationFlagWithoutInterfaceFlag,
+    ClinitMethodWithoutStaticFlag,
     DuplicatedField,
     DuplicatedMethod,
     FieldNameIndexNotConstantUtf8,

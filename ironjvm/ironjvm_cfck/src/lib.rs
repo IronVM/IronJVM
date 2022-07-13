@@ -452,7 +452,13 @@ impl<'clazz> ClassFileChecker<'clazz> {
             return Err(CheckError::InvalidMethodFlags);
         }
 
-        let _ = self.check_methods_get_clinit();
+        if self.state.major >= 51 && let Some(method) = self.check_methods_get_clinit() {
+            let access_flags = method.access_flags;
+
+            if !access_flags.flag_set(MethodAccessFlags::ACC_STATIC) {
+                return Err(CheckError::ClinitMethodWithoutStaticFlag);
+            }
+        }
 
         todo!()
     }
