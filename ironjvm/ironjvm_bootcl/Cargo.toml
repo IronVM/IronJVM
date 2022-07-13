@@ -1,0 +1,11 @@
+[package]
+name = "ironjvm_bootcl"
+authors = ["HTGAzureX1212."]
+version = "18.0.0"
+description = "Java classfile checker for IronJVM"
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]
+
+[dev-dependencies]
