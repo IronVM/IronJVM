@@ -19,6 +19,7 @@
  */
 
 #![feature(iter_advance_by)]
+#![feature(let_chains)]
 #![feature(let_else)]
 
 use std::collections::BTreeSet;
