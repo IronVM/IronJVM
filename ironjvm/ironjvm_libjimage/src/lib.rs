@@ -18,8 +18,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! JVM Specification implementation for IronJVM.
+//! LibJImage bindings for IronJVM.
 
-#![feature(arbitrary_enum_discriminant)]
+use jni_sys::jint;
+use jni_sys::jlong;
 
-pub mod classfile;
+pub struct JImageFile;
+
+pub type JImageLocationRef = jlong;
+
+pub const JIMAGE_MAX_PATH: jint = 4096;
+
+pub const JIMAGE_NOT_FOUND: jint = 0;
+pub const JIMAGE_BAD_MAGIC: jint = -1;
+pub const JIMAGE_BAD_VERSION: jint = -2;
+pub const JIMAGE_CORRUPTED: jint = -3;
+
+extern "C" {
+    fn JIMAGE_Open();
+}

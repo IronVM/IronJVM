@@ -2,7 +2,7 @@
 name = "ironjvm_cfparser"
 authors = ["HTGAzureX1212."]
 version = "18.0.0"
-description = "Java classfile parser for IronJVM"
+description = "Java classfile parser for IronJVM."
 edition = "2021"
 license = "GPL-2.0"
 

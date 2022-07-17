@@ -1,0 +1,13 @@
+[package]
+name = "ironjvm_libjimage"
+authors = ["HTGAzureX1212."]
+version = "18.0.0"
+description = "Bindigs to JImage for IronJVM."
+edition = "2021"
+license = "GPL-2.0"
+
+[dependencies]
+jni-sys = { git = "https://github.com/sfackler/rust-jni-sys", branch = "master" }
+
+[build-dependencies]
+cc = "1.0.73"

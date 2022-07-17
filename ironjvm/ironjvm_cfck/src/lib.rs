@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+//! Java classfile checker for IronJVM.
+
 #![feature(iter_advance_by)]
 #![feature(let_chains)]
 #![feature(let_else)]

@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+//! Convenience utilities when working with Java class files.
+
 pub mod be;
 pub mod descriptor;
 pub mod jstr;

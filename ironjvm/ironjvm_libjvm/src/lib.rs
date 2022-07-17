@@ -18,6 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//! LibJVM dynamic library implementation.
+//! Implementation of the LibJVM dynamic library.
 
 pub mod jniinv;

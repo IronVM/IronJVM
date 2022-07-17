@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+//! Java classfile parser for IronJVM.
+
 #![feature(let_else)]
 
 use ironjvm_javautil::be::JavaBeUtil;
